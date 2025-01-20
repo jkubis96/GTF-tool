@@ -1,0 +1,14 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/reference/add_UTR.html</loc></url>
+<url><loc>/reference/create_full_GTF.html</loc></url>
+<url><loc>/reference/create_GTF_df.html</loc></url>
+<url><loc>/reference/create_reduced_GTF.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/load_annotation.html</loc></url>
+<url><loc>/reference/refflat_create.html</loc></url>
+<url><loc>/reference/sort_alias.html</loc></url>
+</urlset>
+
