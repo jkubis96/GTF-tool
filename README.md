@@ -44,7 +44,7 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 }
 
 # Install the package from URL with dependencies
-devtools::install_url("https://github.com/jkubis96/GTF-tool/raw/refs/heads/extended_version/packages/GTF.tool_0.1.0.tar.gz", dependencies = TRUE)
+devtools::install_url("https://github.com/jkubis96/GTF-tool/raw/refs/heads/main/packages/GTF.tool_0.1.2.tar.gz", dependencies = TRUE)
 ```
 
 
