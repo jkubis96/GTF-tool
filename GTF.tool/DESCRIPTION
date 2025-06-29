@@ -1,7 +1,7 @@
 Package: GTF.tool
 Type: Package
 Title: Toolkit for loading, adjusting, and extending UTRs in GFF/GTF annotation files.
-Version: 0.1.0
+Version: 0.1.2
 Authors@R: c(
     person(given = "", 
            family = "Jakub Kubiś - JBioSystem", 
@@ -12,7 +12,7 @@ Author: Jakub Kubiś - JBioSystem; Institute of Bioorganic Chemistry, PAS
 Maintainer: JBioSystem <jbiosystem@gmail.com>
 Description: 
   GTF.tool provides advanced functionalities for processing genomic annotation 
-  files in GTF (Gene Transfer Format), GFF3, and GFF2 formats. The package is 
+  files in GTF (Gene Transfer Format) and GFF formats. The package is 
   designed to handle large datasets from sources like NCBI, Ensembl, and GENCODE. 
   It includes tools for loading, filtering, sorting, optimizing, and extending 
   annotation data. Key features include:
@@ -21,8 +21,8 @@ Description:
     - Sorting annotations by chromosome, strand, and genomic position.
     - Normalizing and optimizing GTF data by resolving naming conflicts and filling 
       missing annotations.
-    - Predicting and adding 5' and 3' untranslated regions (UTRs) dynamically based 
-      on genomic proximity and neighboring elements.
+    - Creating CDS (coding sequence) regions based on exon coordinates grouped by transcript.
+    - Inferring intron regions by identifying gaps between exons within the same transcript.
   The package leverages parallel processing for high performance, making it ideal 
   for large-scale genomic analyses.
 Imports: 

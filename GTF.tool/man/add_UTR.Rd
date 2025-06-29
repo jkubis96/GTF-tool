@@ -8,7 +8,10 @@ add_UTR(
   input,
   five_prime_utr_length = 400,
   three_prime_utr_length = 800,
-  genetic_elements = c("EXON", "CDS", "TRANSCRIPT", "MRNA")
+  biotype = "protein_coding",
+  transcript_limit = NULL,
+  meta_string = NULL,
+  genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")
 )
 }
 \arguments{

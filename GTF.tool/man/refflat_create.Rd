@@ -4,7 +4,12 @@
 \alias{refflat_create}
 \title{Create Refflat-Style Annotations from Genomic Data}
 \usage{
-refflat_create(input, geneName = "gene_name", name = "gene_id")
+refflat_create(
+  input,
+  geneName = "gene_name",
+  name = "transcript_id",
+  genetic_elements = c("TRANSCRIPT", "MRNA", "CDS", "GENE")
+)
 }
 \arguments{
 \item{input}{A data frame containing genomic data with the following columns:
@@ -21,6 +26,8 @@ refflat_create(input, geneName = "gene_name", name = "gene_id")
 \item{geneName}{A string specifying the column name representing gene names (default: 'gene_name').}
 
 \item{name}{A string specifying the column name representing gene IDs (default: 'gene_id').}
+
+\item{genetic_elements}{Character vector (optional). A vector of genetic element types (e.g., 'CDS', 'GENE', 'MRNA') to include when creating transcripts for a RefFlat file.}
 }
 \value{
 A data frame in refflat format with the following columns:
@@ -48,6 +55,6 @@ exons are matched, and the resulting structure is formatted in the refflat style
 }
 \examples{
 # Run the function
-refflat_data <- refflat_create(input, geneName = 'gene_name', name = 'gene_id')
+refflat_data <- refflat_create(input, geneName = 'gene_name', name = 'gene_id', genetic_elements = c("CDS", 'GENE', 'MRNA'))
 
 }
