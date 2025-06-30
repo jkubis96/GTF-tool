@@ -2,7 +2,7 @@
 % Please edit documentation in R/GTF.tool.R
 \name{add_introns}
 \alias{add_introns}
-\title{Add CDS (Coding Sequence) Annotations to Genomic Data}
+\title{Add Intronic Regions Annotations to Genomic Data}
 \usage{
 add_introns(input)
 }

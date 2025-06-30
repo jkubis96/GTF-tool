@@ -34,7 +34,7 @@
 #' # Run the function
 #' output_data <- add_CDS(input, genetic_elements = c("CDS", 'TRANSCRIPT', 'MRNA'))
 #'
-#' @import stringr dplyr doSNOW foreach doParallel data.table
+#' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
   
@@ -142,7 +142,7 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
 
 
 
-#' Add CDS (Coding Sequence) Annotations to Genomic Data
+#' Add Intronic Regions Annotations to Genomic Data
 #'
 #' @description
 #' This function generates intronic regions for each transcript based on its associated exons.
@@ -175,7 +175,7 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
 #' # Run the function
 #' output_data <- add_introns(input)
 #'
-#' @import stringr dplyr doSNOW foreach doParallel data.table
+#' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 add_introns <- function(input) {
   
@@ -333,7 +333,7 @@ add_introns <- function(input) {
 #' # Load an annotation file and filter for genes and exons:
 #' annotation_data <- load_annotation("path/to/annotation_file.gtf", genetic_elements = c("gene", "exon"))
 #'
-#' @import readr stringr dplyr doSNOW foreach doParallel
+#' @import readr stringr dplyr doSNOW foreach parallel doParallel
 #' @export
 load_annotation <- function(path, genetic_elements = NaN) {
   
@@ -464,7 +464,7 @@ sort_alias <- function(input, chromosomes_queue = NaN) {
 #' @title Helper for create_GTF_df
 #' @description Internal function used inside create_GTF_df.
 #' @keywords internal
-#' @import stringr dplyr doSNOW foreach doParallel data.table
+#' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 optimize_gtf <- function(df, shift = 100000) {
 
   
@@ -701,7 +701,7 @@ optimize_gtf <- function(df, shift = 100000) {
 #' # Process the GTF data
 #' processed_gtf <- create_GTF_df(gtf_data, optimize = TRUE, shift = 50000)
 #' 
-#' @import stringr dplyr doSNOW foreach doParallel data.table
+#' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
   
@@ -1054,7 +1054,7 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 #' # Run the function
 #' output_data <- add_UTR(input, five_prime_utr_length = 400, three_prime_utr_length = 800, genetic_elements = c("EXON", "CDS", 'TRANSCRIPT', 'MRNA'))
 #'
-#' @import stringr dplyr doSNOW foreach doParallel data.table
+#' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length = 800, biotype = 'protein_coding', transcript_limit = NULL, meta_string = NULL, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
   
@@ -2135,7 +2135,7 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 #' # Run the function
 #' refflat_data <- refflat_create(input, geneName = 'gene_name', name = 'gene_id', genetic_elements = c("CDS", 'GENE', 'MRNA'))
 #'
-#' @import stringr dplyr doSNOW foreach doParallel
+#' @import stringr dplyr doSNOW foreach parallel doParallel
 #' @export
 refflat_create <- function(input, geneName = 'gene_name', name = 'transcript_id', genetic_elements = c("TRANSCRIPT", "MRNA", "CDS", 'GENE')) {
   
