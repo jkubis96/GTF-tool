@@ -7,10 +7,10 @@
 load_annotation(path, genetic_elements = NaN)
 }
 \arguments{
-\item{path}{Character. The file path to the annotation file (GTF, GFF, etc.) to be loaded. The file should be tab-delimited 
+\item{path}{Character. The file path to the annotation file (GTF, GFF, etc.) to be loaded. The file should be tab-delimited
 and may include comments prefixed with `#`.}
 
-\item{genetic_elements}{Character vector (optional). A vector of genetic elements (e.g., "gene", "exon", "CDS") to filter the data. 
+\item{genetic_elements}{Character vector (optional). A vector of genetic elements (e.g., "gene", "exon", "CDS") to filter the data.
 If `NaN` (default), no filtering is performed.}
 }
 \value{
@@ -28,12 +28,12 @@ A data frame (tibble) containing the parsed and optionally filtered annotation d
 }
 }
 \description{
-This function reads an annotation file in GTF (Gene Transfer Format) and GFF, or similar formats. It supports files from 
-multiple sources such as NCBI, Ensembl, and GENCODE. The function parses the file contents and optionally filters the data 
+This function reads an annotation file in GTF (Gene Transfer Format) and GFF, or similar formats. It supports files from
+multiple sources such as NCBI, Ensembl, and GENCODE. The function parses the file contents and optionally filters the data
 based on specified genetic elements. It uses various libraries for efficient data manipulation and parallel computing.
 }
 \details{
-The function supports annotation files in GTF/GFF formats from widely used sources such as NCBI, Ensembl, and GENCODE. 
+The function supports annotation files in GTF/GFF formats from widely used sources such as NCBI, Ensembl, and GENCODE.
 It uses `readr` for efficient file reading and supports filtering based on case-insensitive matching of genetic elements.
 }
 \examples{

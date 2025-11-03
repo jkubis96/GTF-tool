@@ -15,8 +15,8 @@ add_CDS(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS"))
 - `annotationType`: Type of annotation (e.g., 'EXON', 'CDS')
 - `gene_name`: Name of the associated gene}
 
-\item{genetic_elements}{A character vector of annotation types to consider when checking for existing elements 
-(default: c("CDS", "TRANSCRIPT", "MRNA")). This is used to determine whether a given element type 
+\item{genetic_elements}{A character vector of annotation types to consider when checking for existing elements
+(default: c("CDS", "TRANSCRIPT", "MRNA")). This is used to determine whether a given element type
 already exists for a transcript; if it does, the CDS will not be created for that transcript.}
 }
 \value{

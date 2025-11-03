@@ -7,10 +7,10 @@
 sort_alias(input, chromosomes_queue = NaN)
 }
 \arguments{
-\item{input}{Data frame. The input annotation data. The first column should represent chromosomes, the fourth 
+\item{input}{Data frame. The input annotation data. The first column should represent chromosomes, the fourth
 column should represent start positions, the fifth column end positions, and the seventh column strands (`+` or `-`).}
 
-\item{chromosomes_queue}{Character vector (optional). A predefined order of chromosomes for sorting. 
+\item{chromosomes_queue}{Character vector (optional). A predefined order of chromosomes for sorting.
 If `NaN` (default), chromosomes will be ordered based on their unique appearance in the input data.}
 }
 \value{
@@ -22,14 +22,14 @@ A data frame containing the sorted annotation data, where:
 }
 }
 \description{
-This function sorts annotation data by chromosome and strand. It organizes data based on user-defined chromosome 
-ordering and sorts each strand (`+` or `-`) by start and end positions. The function is designed to work with 
-data frames that follow the format of GTF or GFF files. 
+This function sorts annotation data by chromosome and strand. It organizes data based on user-defined chromosome
+ordering and sorts each strand (`+` or `-`) by start and end positions. The function is designed to work with
+data frames that follow the format of GTF or GFF files.
 Data must be pre-loaded using load_annotation() or after calling create_GTF_df(), followed by add_UTR(), create_full_GTF(), or create_reduced_GTF().
 }
 \details{
-This function is particularly useful for processing annotation data (e.g., GTF, GFF files) where sorting by 
-genomic position and strand is required. The default chromosome order is determined by the unique appearance 
+This function is particularly useful for processing annotation data (e.g., GTF, GFF files) where sorting by
+genomic position and strand is required. The default chromosome order is determined by the unique appearance
 of chromosomes in the input data, but users can provide a specific order using `chromosomes_queue`.
 
 The function processes each chromosome and strand separately, ensuring data is correctly grouped and sorted.

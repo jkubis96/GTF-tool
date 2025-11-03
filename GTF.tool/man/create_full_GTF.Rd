@@ -24,7 +24,7 @@ create_full_GTF(input)
 - `transcript_id`: Unique identifier for the transcript}
 }
 \value{
-A GTF-style data frame including the first eight columns of the input and a new `combine` column. 
+A GTF-style data frame including the first eight columns of the input and a new `combine` column.
 The `combine` column contains concatenated annotation fields in the format:
 `gene_id`, `gene_name`, `transcript_name`, and `transcript_id`.
 }

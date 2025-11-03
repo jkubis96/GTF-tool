@@ -27,7 +27,7 @@ add_UTR(
 
 \item{three_prime_utr_length}{Integer, the default length of the 3' UTR to add (default: 800).}
 
-\item{genetic_elements}{A character vector of annotation types to consider for UTR extension 
+\item{genetic_elements}{A character vector of annotation types to consider for UTR extension
 (default: c("EXON", "CDS", "TRANSCRIPT", "MRNA")).}
 }
 \value{
@@ -40,7 +40,7 @@ A data frame with the original input data and additional rows for the predicted 
   - Other fields as present in the input data
 }
 \description{
-This function extends genomic annotations by adding predicted 5' and 3' untranslated regions (UTRs) 
+This function extends genomic annotations by adding predicted 5' and 3' untranslated regions (UTRs)
 based on input genomic data. It identifies genes within specified genetic elements and adjusts UTR lengths
 dynamically based on proximity to neighboring genes.
 Data must be pre-loaded using load_annotation() followed by create_GTF_df().

@@ -1,7 +1,7 @@
 Package: GTF.tool
 Type: Package
 Title: Toolkit for loading, adjusting, and extending UTRs in GFF/GTF annotation files.
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: c(
     person(given = "", 
            family = "Jakub Kubiś - JBioSystem", 

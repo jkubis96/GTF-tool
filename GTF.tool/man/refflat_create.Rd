@@ -44,13 +44,13 @@ A data frame in refflat format with the following columns:
   - `exonEnds`: Comma-separated list of exon end positions
 }
 \description{
-This function generates a refflat-style data frame from genomic annotations. The refflat format 
+This function generates a refflat-style data frame from genomic annotations. The refflat format
 represents gene structures, including transcripts and exons, for use in genomic analyses.
 Data must be pre-loaded using load_annotation() followed by create_GTF_df().
 }
 \details{
-The function processes input genomic data in parallel using multiple CPU cores. It filters and processes 
-annotations for transcripts and exons, ensuring that overlapping regions are resolved. Transcripts and 
+The function processes input genomic data in parallel using multiple CPU cores. It filters and processes
+annotations for transcripts and exons, ensuring that overlapping regions are resolved. Transcripts and
 exons are matched, and the resulting structure is formatted in the refflat style.
 }
 \examples{
