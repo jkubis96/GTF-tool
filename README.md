@@ -14,7 +14,6 @@
 <div align="left">
  Institute of Bioorganic Chemistry<br />
  Polish Academy of Sciences<br />
- Department of Molecular Neurobiology<br />
 
 
 
@@ -39,12 +38,12 @@ The package leverages parallel processing for high performance, making it ideal 
 #### Installation
 
 ```
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools")
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes")
 }
 
 # Install the package from URL with dependencies
-devtools::install_url("https://github.com/jkubis96/GTF-tool/raw/refs/heads/main/packages/GTF.tool_0.1.2.tar.gz", dependencies = TRUE)
+remotes::install_url("https://github.com/jkubis96/GTF-tool/raw/refs/heads/main/packages/GTF.tool_0.1.3.tar.gz", dependencies=TRUE)
 ```
 
 
@@ -65,27 +64,27 @@ library(GTF.tool)
 #### Example in R
 
 ```
-GTF <- load_annotation('annotation.gtf')
-
+GTF <- load_annotation("GTF.tool/tests/test_anno.gtf")
+ 
 GTF2 <- create_GTF_df(GTF, optimize = TRUE, shift = 100000)
  
 GTF3 <- add_CDS(GTF2)
- 
+  
 GTF4 <- add_introns(GTF3)
  
-GTF5 <- add_UTR(GTF4, five_prime_utr = 400 , three_prime_utr = 1000)
+GTF5 <- add_UTR(GTF4, five_prime_utr = 300, three_prime_utr = 800)
 
 GTF6 <- create_full_GTF(GTF5)
-
+ 
 write.table(GTF6, 'new_annotation.gtf', quote = F, sep = '\t', col.names = F, row.names = F)
 
 GTF7 <- create_reduced_GTF(GTF5)
 
 write.table(GTF7, 'reduced_new_annotation.gtf', quote = F, sep = '\t', col.names = T, row.names = F)
 
-GTF8 <- refflat_create(GTF5)
-
-write.table(GTF8, 'annotation.refflat', quote = F, sep = '\t', col.names = F, row.names = F)
+ref_flat <- refflat_create(GTF2)
+ 
+write.table(ref_flat, 'annotation.refflat', quote = F, sep = '\t', col.names = F, row.names = F)
 ```
 
 <br />
