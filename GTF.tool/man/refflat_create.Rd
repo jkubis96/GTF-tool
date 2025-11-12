@@ -54,7 +54,8 @@ annotations for transcripts and exons, ensuring that overlapping regions are res
 exons are matched, and the resulting structure is formatted in the refflat style.
 }
 \examples{
+#
 # Run the function
-refflat_data <- refflat_create(input, geneName = 'gene_name', name = 'gene_id', genetic_elements = c("CDS", 'GENE', 'MRNA'))
+refflat_data <- refflat_create(input, geneName = "gene_name", name = "gene_id", genetic_elements = c("CDS", "GENE", "MRNA"))
 
 }

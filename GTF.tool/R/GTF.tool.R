@@ -34,12 +34,11 @@ options(scipen = 999)
 #' @examples
 #'
 #' # Run the function
-#' output_data <- add_CDS(input, genetic_elements = c("CDS", 'TRANSCRIPT', 'MRNA'))
+#' output_data <- add_CDS(input, genetic_elements = c("CDS", "TRANSCRIPT", "MRNA"))
 #'
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
-
   set.seed(123)
 
   input <- sort_alias(input)
@@ -62,37 +61,33 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
 
   chromosomes <- unique(input$chr)
 
-  cat('\n\n CDS adding... \n\n')
-  tmp_final <- foreach(chr = chromosomes, .packages = c('dplyr'), .options.snow = opts, .combine=rbind) %dopar% {
-
+  cat("\n\n CDS adding... \n\n")
+  tmp_final <- foreach(chr = chromosomes, .packages = c("dplyr"), .options.snow = opts, .combine = rbind) %dopar% {
     df <- data.frame(matrix(ncol = ncol(input), nrow = 0))
     colnames(df) <- colnames(input)
 
-    for (sen in c('+','-')) {
+    for (sen in c("+", "-")) {
       tmp <- input[input$chr %in% chr & input$strand %in% sen, ]
 
       gen_list <- unique(tmp$gene_name)
 
-      if (length(gen_list) == 0) {next}
+      if (length(gen_list) == 0) {
+        next
+      }
 
 
       for (i in 1:length(gen_list)) {
+        tmp_transcripts <- tmp[tmp$gene_name %in% gen_list[i], ]
 
-
-        tmp_transcripts <- tmp[tmp$gene_name %in% gen_list[i],]
-
-        tmp_transcripts <- tmp_transcripts[tmp_transcripts$transcript_id != '', ]
+        tmp_transcripts <- tmp_transcripts[tmp_transcripts$transcript_id != "", ]
 
         tr_vec <- unique(tmp_transcripts$transcript_id)
 
         if (length(tr_vec) == 0) {
-
           next
-
         }
 
         for (tri in tr_vec) {
-
           tmp_transcripts_vec <- tmp_transcripts[tmp_transcripts$transcript_id %in% tri, ]
 
           locus <- NULL
@@ -104,31 +99,25 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
           }
 
           if (is.null(locus)) {
+            tmp_ex <- tmp_transcripts_vec[toupper(tmp_transcripts_vec$annotationType) %in% "EXON", ]
 
-            tmp_ex <- tmp_transcripts_vec[toupper(tmp_transcripts_vec$annotationType) %in% 'EXON',]
+            tmp_tr <- tmp_ex[1, ]
 
-            tmp_tr <- tmp_ex[1,]
-
-            tmp_tr$source <- 'JBIO-predicted'
-            tmp_tr$annotationType <- 'CDS'
-            tmp_tr$score <- '.'
-            tmp_tr$phase <- '.'
+            tmp_tr$source <- "JBIO-predicted"
+            tmp_tr$annotationType <- "CDS"
+            tmp_tr$score <- "."
+            tmp_tr$phase <- "."
             tmp_tr$start <- as.integer(min(tmp_ex$start))
             tmp_tr$end <- as.integer(max(tmp_ex$end))
-            tmp_tr$metadata <- ''
+            tmp_tr$metadata <- ""
 
-            df[nrow(df) + 1,] <- tmp_tr[1,]
-
-
+            df[nrow(df) + 1, ] <- tmp_tr[1, ]
           }
-
         }
-
       }
     }
 
     return(df)
-
   }
 
 
@@ -139,7 +128,6 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
   tmp_final <- sort_alias(tmp_final)
 
   return(tmp_final)
-
 }
 
 
@@ -180,7 +168,6 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 add_introns <- function(input) {
-
   set.seed(123)
 
   input <- sort_alias(input)
@@ -203,85 +190,65 @@ add_introns <- function(input) {
 
   chromosomes <- unique(input$chr)
 
-  cat('\n\n introns adding... \n\n')
-  tmp_final <- foreach(chr = chromosomes, .packages = c('dplyr'), .options.snow = opts, .combine=rbind) %dopar% {
-
+  cat("\n\n introns adding... \n\n")
+  tmp_final <- foreach(chr = chromosomes, .packages = c("dplyr"), .options.snow = opts, .combine = rbind) %dopar% {
     df <- data.frame(matrix(ncol = ncol(input), nrow = 0))
     colnames(df) <- colnames(input)
 
-    for (sen in c('+','-')) {
+    for (sen in c("+", "-")) {
       tmp <- input[input$chr %in% chr & input$strand %in% sen, ]
 
       gen_list <- unique(tmp$gene_name)
 
-      if (length(gen_list) == 0) {next}
+      if (length(gen_list) == 0) {
+        next
+      }
 
 
       for (i in 1:length(gen_list)) {
+        tmp_transcripts <- tmp[tmp$gene_name %in% gen_list[i], ]
 
-
-        tmp_transcripts <- tmp[tmp$gene_name %in% gen_list[i],]
-
-        tmp_transcripts <- tmp_transcripts[tmp_transcripts$transcript_id != '', ]
+        tmp_transcripts <- tmp_transcripts[tmp_transcripts$transcript_id != "", ]
 
         tr_vec <- unique(tmp_transcripts$transcript_id)
 
         if (length(tr_vec) == 0) {
-
           next
-
         }
 
 
         for (tri in tr_vec) {
-
           tmp_transcripts_vec <- tmp_transcripts[tmp_transcripts$transcript_id %in% tri, ]
 
 
-          if ('EXON' %in% toupper(tmp_transcripts_vec$annotationType)) {
-
-            tmp_ex <- tmp_transcripts_vec[toupper(tmp_transcripts_vec$annotationType) %in% 'EXON',]
+          if ("EXON" %in% toupper(tmp_transcripts_vec$annotationType)) {
+            tmp_ex <- tmp_transcripts_vec[toupper(tmp_transcripts_vec$annotationType) %in% "EXON", ]
 
             if (nrow(tmp_ex) > 1) {
-
-              tmp_ex <- tmp_ex[order(tmp_ex$start),]
+              tmp_ex <- tmp_ex[order(tmp_ex$start), ]
 
               for (exi in 1:nrow(tmp_ex)) {
-
                 if (exi != 1) {
+                  tmp_tr <- tmp_ex[1, ]
 
-                  tmp_tr <- tmp_ex[1,]
-
-                  tmp_tr$source <- 'JBIO-predicted'
-                  tmp_tr$annotationType <- 'intron'
-                  tmp_tr$score <- '.'
-                  tmp_tr$phase <- '.'
-                  tmp_tr$start <- as.integer(tmp_ex$end[exi-1]) + 1
+                  tmp_tr$source <- "JBIO-predicted"
+                  tmp_tr$annotationType <- "intron"
+                  tmp_tr$score <- "."
+                  tmp_tr$phase <- "."
+                  tmp_tr$start <- as.integer(tmp_ex$end[exi - 1]) + 1
                   tmp_tr$end <- as.integer(tmp_ex$start[exi]) - 1
-                  tmp_tr$metadata <- ''
+                  tmp_tr$metadata <- ""
 
-                  df[nrow(df) + 1,] <- tmp_tr[1,]
-
-
+                  df[nrow(df) + 1, ] <- tmp_tr[1, ]
                 }
-
               }
-
-
-
             }
-
-
-
           }
-
         }
-
       }
     }
 
     return(df)
-
   }
 
 
@@ -292,7 +259,6 @@ add_introns <- function(input) {
   tmp_final <- sort_alias(tmp_final)
 
   return(tmp_final)
-
 }
 
 
@@ -338,39 +304,36 @@ add_introns <- function(input) {
 #' @import readr stringr dplyr doSNOW foreach parallel doParallel
 #' @export
 load_annotation <- function(path, genetic_elements = NaN) {
-
   set.seed(123)
 
   options(scipen = 999)
 
 
-  cat('\n\n Data loading... \n\n')
+  cat("\n\n Data loading... \n\n")
 
 
-  GTF <- read_delim(path, delim = "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE, comment = '#',
-                    col_types = cols(
-                      X1 = col_character(),
-                      X2 = col_character(),
-                      X3 = col_character(),
-                      X4 = col_integer(),
-                      X5 = col_integer(),
-                      X6 = col_character(),
-                      X7 = col_character(),
-                      X8 = col_character(),
-                      X9 = col_character()
-                    ))
+  GTF <- read_delim(path,
+    delim = "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE, comment = "#",
+    col_types = cols(
+      X1 = col_character(),
+      X2 = col_character(),
+      X3 = col_character(),
+      X4 = col_integer(),
+      X5 = col_integer(),
+      X6 = col_character(),
+      X7 = col_character(),
+      X8 = col_character(),
+      X9 = col_character()
+    )
+  )
 
   if (!is.na(genetic_elements)) {
-
-
     GTF <- GTF[toupper(GTF$X3) %in% toupper(genetic_elements), ]
-
   }
 
 
 
   return(GTF)
-
 }
 
 
@@ -411,7 +374,6 @@ load_annotation <- function(path, genetic_elements = NaN) {
 #'
 #' @export
 sort_alias <- function(input, chromosomes_queue = NaN) {
-
   set.seed(123)
 
   options(scipen = 999)
@@ -425,19 +387,18 @@ sort_alias <- function(input, chromosomes_queue = NaN) {
 
 
   if (is.na(chromosomes_queue)) {
-    chromosomes_queue = unique(input[[chro_col]])
+    chromosomes_queue <- unique(input[[chro_col]])
   }
 
   output <- data.frame()
 
   for (ch in chromosomes_queue) {
-    for (s in c('+', '-')) {
+    for (s in c("+", "-")) {
+      cat("\n", paste("CHROMOSOME:", ch, "| STRAND:", s, " sorting...                              "))
 
-      cat('\n',paste('CHROMOSOME:', ch , '| STRAND:', s,' sorting...                              '))
+      tmp <- input[(input[[chro_col]] %in% ch & input[[starnd]] %in% s), ]
 
-      tmp <- input[(input[[chro_col]] %in% ch & input[[starnd]] %in% s),]
-
-      tmp <- tmp[order(tmp[[start_col]], -tmp[[end_col]]),]
+      tmp <- tmp[order(tmp[[start_col]], -tmp[[end_col]]), ]
 
       tmp$gene_name <- factor(tmp$gene_name, levels = unique(tmp$gene_name))
 
@@ -450,11 +411,7 @@ sort_alias <- function(input, chromosomes_queue = NaN) {
       tmp$gene_name <- as.character(tmp$gene_name)
 
       output <- rbind(output, tmp)
-
-
-
     }
-
   }
 
   return(output)
@@ -468,48 +425,41 @@ sort_alias <- function(input, chromosomes_queue = NaN) {
 #' @keywords internal
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 optimize_gtf <- function(df, shift = 100000) {
-
-
   df$lp <- 1:length(df$X1)
 
-  #repair duplicated genes names from different loci
+  # repair duplicated genes names from different loci
 
   duplicated_names <- c()
 
 
   # find annotation shifted on shift parameter (same chromosome different location)
 
-  for (pm in c('+','-')) {
+  for (pm in c("+", "-")) {
     for (ch in unique(df$X1)) {
-
       tmp <- df[(df$X1 %in% ch & df$X7 %in% pm), ]
-      tmp <- tmp[tmp$gene_name != '', ]
+      tmp <- tmp[tmp$gene_name != "", ]
 
       if (nrow(tmp) > 0) {
-
-
         tmp <- tmp %>%
-        group_by(gene_name) %>%
-        summarise(
-          start_min = min(X4),
-          start_max = max(X4),
-          diff = start_max - start_min
-        )
+          group_by(gene_name) %>%
+          summarise(
+            start_min = min(X4),
+            start_max = max(X4),
+            diff = start_max - start_min
+          )
 
-      to_add <- as.vector(tmp$gene_name[tmp$diff >= shift])
-      if (length(to_add) > 0) {
-        duplicated_names <- c(duplicated_names, to_add)
-
+        to_add <- as.vector(tmp$gene_name[tmp$diff >= shift])
+        if (length(to_add) > 0) {
+          duplicated_names <- c(duplicated_names, to_add)
         }
       }
     }
-
   }
 
 
   # find annotation form different strands
 
-  tmp = df %>%
+  tmp <- df %>%
     group_by(gene_name) %>%
     summarise(
       has_plus = any(X7 == "+"),
@@ -520,13 +470,12 @@ optimize_gtf <- function(df, shift = 100000) {
 
   if (TRUE %in% tmp$both_strands) {
     duplicated_names <- c(duplicated_names, as.vector(tmp$gene_name[tmp$both_strands == TRUE]))
-
   }
 
 
   # find annotations from different chromosomes
 
-  tmp = df %>%
+  tmp <- df %>%
     group_by(gene_name) %>%
     summarise(
       unique_X1 = n_distinct(X1),
@@ -536,21 +485,19 @@ optimize_gtf <- function(df, shift = 100000) {
 
   if (TRUE %in% tmp$multiple_X1) {
     duplicated_names <- c(duplicated_names, as.vector(tmp$gene_name[tmp$multiple_X1 == TRUE]))
-
   }
 
 
 
   duplicated_names <- unique(duplicated_names)
 
-  duplicated_names <- duplicated_names[duplicated_names != '']
+  duplicated_names <- duplicated_names[duplicated_names != ""]
 
   if (length(duplicated_names) > 0) {
-
     # data preparing
 
-    dedup_df <- df[, colnames(df) %in% c('X1','X7', 'X3', 'X4', 'X5', 'gene_name', 'transcript_id', 'lp')]
-    dedup_df <- dedup_df[dedup_df$gene_name %in% duplicated_names,]
+    dedup_df <- df[, colnames(df) %in% c("X1", "X7", "X3", "X4", "X5", "gene_name", "transcript_id", "lp")]
+    dedup_df <- dedup_df[dedup_df$gene_name %in% duplicated_names, ]
     # dedup_df <- sort_alias(dedup_df)
 
 
@@ -568,51 +515,46 @@ optimize_gtf <- function(df, shift = 100000) {
       mutate(check_str = n_distinct(X7) > 1) %>%
       ungroup()
 
-    dedup_df$renamed <- gsub(' ', '', gsub('"', '', dedup_df$gene_name))
+    dedup_df$renamed <- gsub(" ", "", gsub('"', "", dedup_df$gene_name))
 
 
-    dedup_df$renamed[dedup_df$check_chr == TRUE] <- paste0(dedup_df$renamed[dedup_df$check_chr == TRUE] , '.',  dedup_df$X1[dedup_df$check_chr == TRUE] )
+    dedup_df$renamed[dedup_df$check_chr == TRUE] <- paste0(dedup_df$renamed[dedup_df$check_chr == TRUE], ".", dedup_df$X1[dedup_df$check_chr == TRUE])
 
 
-    dedup_df$renamed[dedup_df$check_str == TRUE] <- paste0(dedup_df$renamed[dedup_df$check_str == TRUE] , '.str', dedup_df$X7[dedup_df$check_str == TRUE] )
+    dedup_df$renamed[dedup_df$check_str == TRUE] <- paste0(dedup_df$renamed[dedup_df$check_str == TRUE], ".str", dedup_df$X7[dedup_df$check_str == TRUE])
 
-    dedup_df <- dedup_df[, !colnames(dedup_df) %in% c('check_str', 'check_chr')]
+    dedup_df <- dedup_df[, !colnames(dedup_df) %in% c("check_str", "check_chr")]
 
 
     duplicated_names <- unique(dedup_df$renamed)
 
 
-    cat('\n\n Duplicated genes repairing...             \n\n ')
+    cat("\n\n Duplicated genes repairing...             \n\n ")
 
     results_list <- list()
     result_index <- 1
 
     for (gen in seq_along(duplicated_names)) {
-
-      if (length(duplicated_names[gen]) == 0 ) {
+      if (length(duplicated_names[gen]) == 0) {
         next
       }
 
-      cat('\r', paste('GENE:', duplicated_names[gen], '| PROGRESS:', round((gen / length(duplicated_names) * 100), 2), '%                           '))
+      cat("\r", paste("GENE:", duplicated_names[gen], "| PROGRESS:", round((gen / length(duplicated_names) * 100), 2), "%                           "))
 
       tmp <- dedup_df[dedup_df$renamed %in% duplicated_names[gen], ]
 
       group <- 1
 
       for (i in seq_len(nrow(tmp))) {
-
-
         if (nrow(tmp) == 1) {
           tmp$group <- group
           results_list[[result_index]] <- tmp
           result_index <- result_index + 1
-
         } else if (i == 1) {
           tmp1 <- tmp[i, ]
           tmp1$group <- group
           results_list[[result_index]] <- tmp1
           result_index <- result_index + 1
-
         } else {
           tmp1 <- tmp[i - 1, ]
           tmp2 <- tmp[i, ]
@@ -638,27 +580,25 @@ optimize_gtf <- function(df, shift = 100000) {
       ungroup()
 
 
-    global_df$renamed[global_df$check == TRUE] <- paste0(global_df$renamed[global_df$check == TRUE] , '.var', global_df$group[global_df$check == TRUE] )
+    global_df$renamed[global_df$check == TRUE] <- paste0(global_df$renamed[global_df$check == TRUE], ".var", global_df$group[global_df$check == TRUE])
 
-    global_df <- global_df[, !colnames(global_df) %in% c('check', 'group')]
+    global_df <- global_df[, !colnames(global_df) %in% c("check", "group")]
 
 
     rm(dedup_df)
 
 
-    #rename genes
+    # rename genes
 
     idx <- match(global_df$lp, df$lp)
     valid <- !is.na(idx)
     df$gene_name[idx[valid]] <- global_df$renamed[valid]
 
     rm(global_df)
-
   }
 
 
-  return(df[, !colnames(df) %in% c('lp')])
-
+  return(df[, !colnames(df) %in% c("lp")])
 }
 
 
@@ -706,32 +646,30 @@ optimize_gtf <- function(df, shift = 100000) {
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
 create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
-
   set.seed(123)
 
   options(scipen = 999)
 
-  cat('\n\n GTF converting... \n\n')
+  cat("\n\n GTF converting... \n\n")
 
-  df <- input[,1:8]
+  df <- input[, 1:8]
 
   df$bind <- 1:nrow(df)
 
   input$bind <- 1:nrow(df)
 
 
-  if (TRUE %in% grepl('gene_name', input$X9) | TRUE %in% grepl('gene_id', input$X9)) {
-
-    #GENECODE & https://www.ensembl.org/index.html
+  if (TRUE %in% grepl("gene_name", input$X9) | TRUE %in% grepl("gene_id", input$X9)) {
+    # GENECODE & https://www.ensembl.org/index.html
     #############################################################
 
 
     # gene id
-    df$gene_id_check <- grepl('gene_id', input$X9)
+    df$gene_id_check <- grepl("gene_id", input$X9)
 
     df$gene_id <- ifelse(
-      grepl('gene_id', input$X9),
-      gsub(' ', '', gsub('"', '',gsub(".*=", "", gsub(";.*", "", gsub(".*gene_id", "", input$X9))))),
+      grepl("gene_id", input$X9),
+      gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(";.*", "", gsub(".*gene_id", "", input$X9))))),
       ""
     )
 
@@ -740,11 +678,11 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     # gene name
-    df$gene_name_check <- grepl('gene_name', input$X9)
+    df$gene_name_check <- grepl("gene_name", input$X9)
 
     df$gene_name <- ifelse(
-      grepl('gene_name', input$X9),
-      gsub(' ', '', gsub('"', '', gsub(".*=", "", gsub(";.*", "", gsub(".*gene_name", "", input$X9))))),
+      grepl("gene_name", input$X9),
+      gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(";.*", "", gsub(".*gene_name", "", input$X9))))),
       ""
     )
 
@@ -754,11 +692,11 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     # transcript name
-    df$transcript_name_check <- grepl('transcript_name', input$X9)
+    df$transcript_name_check <- grepl("transcript_name", input$X9)
 
     df$transcript_name <- ifelse(
-      grepl('transcript_name', input$X9),
-      gsub(' ', '', gsub('"', '', gsub(".*=", "", gsub(".*?\\s", "", gsub(";.*", "", gsub(".*transcript_name", "", input$X9)))))),
+      grepl("transcript_name", input$X9),
+      gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(".*?\\s", "", gsub(";.*", "", gsub(".*transcript_name", "", input$X9)))))),
       ""
     )
 
@@ -768,11 +706,11 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     # transcript id
-    df$transcript_id_check <-grepl('transcript_id', input$X9)
+    df$transcript_id_check <- grepl("transcript_id", input$X9)
 
     df$transcript_id <- ifelse(
-      grepl('transcript_id', input$X9),
-      gsub(' ', '', gsub('"', '', gsub(".*=", "", gsub(".*?\\s", "", gsub(";.*", "", gsub(".*transcript_id", "", input$X9)))))),
+      grepl("transcript_id", input$X9),
+      gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(".*?\\s", "", gsub(";.*", "", gsub(".*transcript_id", "", input$X9)))))),
       ""
     )
 
@@ -780,26 +718,24 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
     # gene_type
 
-    type <- grepl('gene_type', input$X9)
-    biotype <- grepl('gene_biotype', input$X9)
+    type <- grepl("gene_type", input$X9)
+    biotype <- grepl("gene_biotype", input$X9)
 
 
     if (TRUE %in% type) {
       df$gene_type <- ifelse(
         type,
-        gsub(' ', '', gsub('"', '',gsub(".*=", "", gsub(";.*", "", gsub(".*gene_type", "", input$X9))))),
+        gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(";.*", "", gsub(".*gene_type", "", input$X9))))),
         ""
       )
-
     } else if (TRUE %in% biotype) {
       df$gene_type <- ifelse(
         biotype,
-        gsub(' ', '', gsub('"', '',gsub(".*=", "", gsub(";.*", "", gsub(".*gene_biotype", "", input$X9))))),
+        gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(";.*", "", gsub(".*gene_biotype", "", input$X9))))),
         ""
       )
-
     } else {
-      df$gene_type <- ''
+      df$gene_type <- ""
     }
 
 
@@ -807,58 +743,50 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
     # reapiring lack of gene_names
 
 
-    df <- df[!(df$gene_name_check == FALSE & df$gene_id_check == FALSE & df$transcript_id_check == FALSE & df$transcript_name_check == FALSE),  ]
+    df <- df[!(df$gene_name_check == FALSE & df$gene_id_check == FALSE & df$transcript_id_check == FALSE & df$transcript_name_check == FALSE), ]
 
-    df$gene_id[df$gene_id_check == FALSE] <-  df$transcript_id[df$gene_id_check == FALSE]
+    df$gene_id[df$gene_id_check == FALSE] <- df$transcript_id[df$gene_id_check == FALSE]
 
 
-    tmp_gn <- distinct(df[,c('gene_id', 'gene_name')])
+    tmp_gn <- distinct(df[, c("gene_id", "gene_name")])
 
     df$gene_name <- tmp_gn$gene_name[match(df$gene_id, tmp_gn$gene_id)]
 
     df$gene_name_check <- df$gene_name != ""
 
-    df$gene_name[df$gene_name_check == FALSE] <-  df$gene_id[df$gene_name_check == FALSE]
+    df$gene_name[df$gene_name_check == FALSE] <- df$gene_id[df$gene_name_check == FALSE]
 
     df$transcript_name[df$transcript_name_check == FALSE] <- df$gene_name[df$transcript_name_check == FALSE]
 
 
-    tmp_type <- distinct(df[,c('gene_type', 'gene_name')])
+    tmp_type <- distinct(df[, c("gene_type", "gene_name")])
 
 
     df$gene_type <- tmp_type$gene_type[match(df$gene_name, tmp_type$gene_name)]
 
-    rm (tmp_type)
+    rm(tmp_type)
 
 
     ############################################################################
 
 
-    df <- df[,!colnames(df) %in% c('gene_id_check', 'gene_name_check', 'transcript_name_check', 'transcript_id_check')]
+    df <- df[, !colnames(df) %in% c("gene_id_check", "gene_name_check", "transcript_name_check", "transcript_id_check")]
 
-    df$metadata <- as.vector(input[,9])
+    df$metadata <- as.vector(input[, 9])
 
 
 
 
     if (optimize) {
-
-
       df <- optimize_gtf(df = df, shift = shift)
-
-
-
     }
-
-
-  } else if (TRUE %in% grepl('=gene-', input$X9) | TRUE %in% grepl('gene=', input$X9)) {
-
-    #NCBI
+  } else if (TRUE %in% grepl("=gene-", input$X9) | TRUE %in% grepl("gene=", input$X9)) {
+    # NCBI
     ################################################################
 
 
     # gene id
-    df$gene_id_check <- grepl('GeneID', input$X9)
+    df$gene_id_check <- grepl("GeneID", input$X9)
 
     df$gene_id <- ifelse(
       df$gene_id_check,
@@ -870,11 +798,11 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     # gene name 1
-    df$gene_name_check1 <- grepl('=gene-', input$X9)
+    df$gene_name_check1 <- grepl("=gene-", input$X9)
 
     df$gene_name1 <- ifelse(
       df$gene_name_check1,
-      gsub(' ', '', gsub('"', '', gsub(";.*", "", gsub(".*=gene-", "", input$X9)))),
+      gsub(" ", "", gsub('"', "", gsub(";.*", "", gsub(".*=gene-", "", input$X9)))),
       ""
     )
 
@@ -883,11 +811,11 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     # gene name 1
-    df$gene_name_check2 <- grepl(';gene=', input$X9)
+    df$gene_name_check2 <- grepl(";gene=", input$X9)
 
     df$gene_name2 <- ifelse(
       df$gene_name_check2,
-      gsub(' ', '', gsub('"', '', gsub(";.*", "", gsub(".*;gene=", "", input$X9)))),
+      gsub(" ", "", gsub('"', "", gsub(";.*", "", gsub(".*;gene=", "", input$X9)))),
       ""
     )
 
@@ -895,7 +823,7 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
     df$gene_name_check2 <- df$gene_name2 != ""
 
 
-    df$gene_name = ''
+    df$gene_name <- ""
     df$gene_name[df$gene_name_check2 == TRUE] <- df$gene_name2[df$gene_name_check2 == TRUE]
     df$gene_name[df$gene_name_check1 == TRUE] <- df$gene_name1[df$gene_name_check1 == TRUE]
 
@@ -903,15 +831,15 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
     # transcript name
 
-    df$transcript_name <- ''
+    df$transcript_name <- ""
 
 
     # transcript id
-    df$transcript_id_check1 <-grepl('Genbank:', input$X9)
+    df$transcript_id_check1 <- grepl("Genbank:", input$X9)
 
     df$transcript_id1 <- ifelse(
       df$transcript_id_check1,
-      gsub(' ', '', gsub('"', '', gsub(";.*", "", gsub(",.*", "", gsub(".*Genbank:", "", input$X9))))),
+      gsub(" ", "", gsub('"', "", gsub(";.*", "", gsub(",.*", "", gsub(".*Genbank:", "", input$X9))))),
       ""
     )
 
@@ -920,11 +848,11 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     # transcript id
-    df$transcript_id_check2 <-grepl('transcript_id=', input$X9)
+    df$transcript_id_check2 <- grepl("transcript_id=", input$X9)
 
     df$transcript_id2 <- ifelse(
-      df$transcript_id_check2 ,
-      gsub(' ', '', gsub('"', '', gsub(";.*", "", gsub(",.*", "", gsub(".*transcript_id=", "", input$X9))))),
+      df$transcript_id_check2,
+      gsub(" ", "", gsub('"', "", gsub(";.*", "", gsub(",.*", "", gsub(".*transcript_id=", "", input$X9))))),
       ""
     )
 
@@ -932,7 +860,7 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
 
-    df$transcript_id = ''
+    df$transcript_id <- ""
     df$transcript_id[df$transcript_id_check2 == TRUE] <- df$transcript_id2[df$transcript_id_check2 == TRUE]
     df$transcript_id[df$transcript_id_check1 == TRUE] <- df$transcript_id1[df$transcript_id_check1 == TRUE]
 
@@ -941,26 +869,24 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
     # gene_type
 
-    type <- grepl('gene_type', input$X9)
-    biotype <- grepl('gene_biotype', input$X9)
+    type <- grepl("gene_type", input$X9)
+    biotype <- grepl("gene_biotype", input$X9)
 
 
     if (TRUE %in% type) {
       df$gene_type <- ifelse(
         type,
-        gsub(' ', '', gsub('"', '',gsub(".*=", "", gsub(";.*", "", gsub(".*gene_type", "", input$X9))))),
+        gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(";.*", "", gsub(".*gene_type", "", input$X9))))),
         ""
       )
-
     } else if (TRUE %in% biotype) {
       df$gene_type <- ifelse(
         biotype,
-        gsub(' ', '', gsub('"', '',gsub(".*=", "", gsub(";.*", "", gsub(".*gene_biotype", "", input$X9))))),
+        gsub(" ", "", gsub('"', "", gsub(".*=", "", gsub(";.*", "", gsub(".*gene_biotype", "", input$X9))))),
         ""
       )
-
     } else {
-      df$gene_type <- ''
+      df$gene_type <- ""
     }
 
 
@@ -969,12 +895,12 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
     # reapiring lack of gene_names
 
 
-    df <- df[!(df$gene_name_check1 == FALSE & df$gene_name_check2 == FALSE & df$gene_id_check == FALSE & df$transcript_id_check1 == FALSE & df$transcript_id_check2 == FALSE),  ]
+    df <- df[!(df$gene_name_check1 == FALSE & df$gene_name_check2 == FALSE & df$gene_id_check == FALSE & df$transcript_id_check1 == FALSE & df$transcript_id_check2 == FALSE), ]
 
-    df$gene_id[df$gene_id_check == FALSE] <-  df$transcript_id[df$gene_id_check == FALSE]
+    df$gene_id[df$gene_id_check == FALSE] <- df$transcript_id[df$gene_id_check == FALSE]
 
 
-    tmp_gn <- distinct(df[,c('gene_id', 'gene_name')])
+    tmp_gn <- distinct(df[, c("gene_id", "gene_name")])
 
     df$gene_name <- tmp_gn$gene_name[match(df$gene_id, tmp_gn$gene_id)]
 
@@ -983,39 +909,32 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
     df$transcript_name[df$transcript_id_check1 == TRUE | df$transcript_id_check2 == TRUE] <- df$gene_name[df$transcript_id_check1 == TRUE | df$transcript_id_check2 == TRUE]
 
-    tmp_type <- distinct(df[,c('gene_type', 'gene_name')])
+    tmp_type <- distinct(df[, c("gene_type", "gene_name")])
 
     df$gene_type <- tmp_type$gene_type[match(df$gene_name, tmp_type$gene_name)]
 
-    rm (tmp_type)
+    rm(tmp_type)
 
 
     ############################################################################
 
-    df <- df[,!colnames(df) %in% c('gene_id_check', 'gene_name_check1', 'gene_name_check2', 'transcript_id_check1', 'transcript_id_check2', 'gene_name1', 'gene_name2', 'transcript_id1', 'transcript_id2')]
+    df <- df[, !colnames(df) %in% c("gene_id_check", "gene_name_check1", "gene_name_check2", "transcript_id_check1", "transcript_id_check2", "gene_name1", "gene_name2", "transcript_id1", "transcript_id2")]
 
 
     if (optimize) {
-
-
       df <- optimize_gtf(df = df, shift = shift)
-
-
     }
-
-
   }
 
 
   df$metadata <- input$X9[match(df$bind, input$bind)]
 
-  df <- df[,!colnames(df) %in% c('bind')]
+  df <- df[, !colnames(df) %in% c("bind")]
 
 
-  colnames(df) <- c('chr','source','annotationType','start','end','score','strand','phase','gene_id','gene_name','transcript_name','transcript_id', 'gene_type', 'metadata')
+  colnames(df) <- c("chr", "source", "annotationType", "start", "end", "score", "strand", "phase", "gene_id", "gene_name", "transcript_name", "transcript_id", "gene_type", "metadata")
 
   return(df)
-
 }
 
 #' Add UTR (Untranslated Region) Annotations to Genomic Data
@@ -1054,19 +973,17 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 #' @examples
 #'
 #' # Run the function
-#' output_data <- add_UTR(input, five_prime_utr_length = 400, three_prime_utr_length = 800, genetic_elements = c("EXON", "CDS", 'TRANSCRIPT', 'MRNA'))
+#' output_data <- add_UTR(input, five_prime_utr_length = 400, three_prime_utr_length = 800, genetic_elements = c("EXON", "CDS", "TRANSCRIPT", "MRNA"))
 #'
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
-add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length = 800, biotype = 'protein_coding', transcript_limit = NULL, meta_string = NULL, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
-
-
+add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length = 800, biotype = "protein_coding", transcript_limit = NULL, meta_string = NULL, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
   genetic_elements <- toupper(genetic_elements)
   set.seed(123)
 
   options(scipen = 999)
 
-  cat('\n\n UTRs sequence extending...             \n\n')
+  cat("\n\n UTRs sequence extending...             \n\n")
 
   tmp_final <- list()
   il <- 0
@@ -1078,38 +995,25 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
   CDS <- final[toupper(input$annotationType) %in% toupper(genetic_elements), ]
 
 
-  to_extend <- CDS[CDS$transcript_id != '', ]
+  to_extend <- CDS[CDS$transcript_id != "", ]
 
 
   if (!is.null(meta_string)) {
-
-    to_extend <- to_extend[grepl(pattern = toupper(meta_string), toupper(to_extend$metadata)) , ]
-
+    to_extend <- to_extend[grepl(pattern = toupper(meta_string), toupper(to_extend$metadata)), ]
   }
 
   if (!is.null(transcript_limit)) {
-
     to_extend$diff <- to_extend$end - to_extend$start
-    to_extend <- to_extend[to_extend$diff >  transcript_limit, ]
-
-
+    to_extend <- to_extend[to_extend$diff > transcript_limit, ]
   }
 
 
   if (!is.null(biotype)) {
-
     if (biotype %in% CDS$gene_type) {
-
       to_extend <- to_extend[to_extend$gene_type %in% biotype, ]
-
-
     } else {
-
-      cat(paste0('Provided biotype: ', as.character(biotype), ' does not exist in data!'))
-
+      cat(paste0("Provided biotype: ", as.character(biotype), " does not exist in data!"))
     }
-
-
   }
 
   to_extend_genes <- unique(to_extend$gene_name)
@@ -1117,27 +1021,21 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
   rm(to_extend)
 
   for (chr in chromosomes) {
-
-    for (sen in c('+','-')) {
-
+    for (sen in c("+", "-")) {
       tmp_genes <- CDS[CDS$chr %in% chr & CDS$strand %in% sen, ]
 
       gen_list <- unique(tmp_genes$gene_name)
 
       if (length(gen_list) > 0) {
-
         for (i in 1:length(gen_list)) {
-
-
           if (!gen_list[i] %in% to_extend_genes) {
-
             next
           }
 
-          cat('\r',paste('LOC:',chr, '| STRAND:', sen , '| PROGRESS:', round((i/length(gen_list)*100),2), '%           '))
+          cat("\r", paste("LOC:", chr, "| STRAND:", sen, "| PROGRESS:", round((i / length(gen_list) * 100), 2), "%           "))
 
 
-          tmp_transcripts <- tmp_genes[tmp_genes$gene_name %in% gen_list[i],]
+          tmp_transcripts <- tmp_genes[tmp_genes$gene_name %in% gen_list[i], ]
 
           locus <- NULL
           for (g in genetic_elements) {
@@ -1151,7 +1049,7 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
             next
           }
 
-          tmp_transcripts <- tmp_transcripts[toupper(tmp_transcripts$annotationType) %in% locus,]
+          tmp_transcripts <- tmp_transcripts[toupper(tmp_transcripts$annotationType) %in% locus, ]
 
 
           # debug
@@ -1161,114 +1059,93 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
           # tmp variables
 
           for (tix in rownames(tmp_transcripts)) {
-            tmp <- tmp_transcripts[tix,]
+            tmp <- tmp_transcripts[tix, ]
 
 
-            five_prime_utr_length_cor_minus = NaN
-            five_prime_utr_length_cor_plus = NaN
-            three_prime_utr_length_cor_minus = NaN
-            three_prime_utr_length_cor_plus = NaN
+            five_prime_utr_length_cor_minus <- NaN
+            five_prime_utr_length_cor_plus <- NaN
+            three_prime_utr_length_cor_minus <- NaN
+            three_prime_utr_length_cor_plus <- NaN
 
 
             if (i == 1) {
-
               # first element
 
 
-              tmp2 <- tmp_genes[tmp_genes$gene_name %in% gen_list[i+1],]
+              tmp2 <- tmp_genes[tmp_genes$gene_name %in% gen_list[i + 1], ]
 
 
-              if (min(tmp2$start) > (max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length)+2))) {
-
-                if (sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                  three_prime_utr_length_cor_plus <- round(three_prime_utr_length,0)
+              if (min(tmp2$start) > (max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length) + 2))) {
+                if (sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                  three_prime_utr_length_cor_plus <- round(three_prime_utr_length, 0)
                 } else {
-                  five_prime_utr_length_cor_minus <- round(five_prime_utr_length,0)
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                  five_prime_utr_length_cor_minus <- round(five_prime_utr_length, 0)
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                 }
-
-              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length)/2)) {
-
-                if (sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                  three_prime_utr_length_cor_plus <- round(three_prime_utr_length*0.5,0)
+              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length) / 2)) {
+                if (sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                  three_prime_utr_length_cor_plus <- round(three_prime_utr_length * 0.5, 0)
                 } else {
-                  five_prime_utr_length_cor_minus <- round(five_prime_utr_length*0.5,0)
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                  five_prime_utr_length_cor_minus <- round(five_prime_utr_length * 0.5, 0)
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                 }
-
-              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length)/3)) {
-
-                if (sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                  three_prime_utr_length_cor_plus <- round(three_prime_utr_length*0.3,0)
+              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length) / 3)) {
+                if (sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                  three_prime_utr_length_cor_plus <- round(three_prime_utr_length * 0.3, 0)
                 } else {
-                  five_prime_utr_length_cor_minus <- round(five_prime_utr_length*0.3,0)
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
-
+                  five_prime_utr_length_cor_minus <- round(five_prime_utr_length * 0.3, 0)
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                 }
-
-              } else if (min(tmp2$start) > max(tmp$end)){
-
-                if (sen == '+') {
+              } else if (min(tmp2$start) > max(tmp$end)) {
+                if (sen == "+") {
                   five_prime_utr_length_cor_plus <- five_prime_utr_length
-                  three_prime_utr_length_cor_plus <- round((min(tmp2$start) - max(tmp$end) -2) / 2,0)
+                  three_prime_utr_length_cor_plus <- round((min(tmp2$start) - max(tmp$end) - 2) / 2, 0)
                   if (three_prime_utr_length_cor_plus < 0) {
                     three_prime_utr_length_cor_plus <- 0
                   }
                 } else {
-                  five_prime_utr_length_cor_minus <- round((min(tmp2$start) - max(tmp$end) -2) / 2, 0)
+                  five_prime_utr_length_cor_minus <- round((min(tmp2$start) - max(tmp$end) - 2) / 2, 0)
                   if (five_prime_utr_length_cor_minus < 0) {
                     five_prime_utr_length_cor_minus <- 0
                   }
                   three_prime_utr_length_cor_minus <- three_prime_utr_length
-
                 }
-
-
               } else {
-
-                if (sen == '+') {
+                if (sen == "+") {
                   five_prime_utr_length_cor_plus <- five_prime_utr_length
-
                 } else {
-
                   three_prime_utr_length_cor_minus <- three_prime_utr_length
-
                 }
-
-
               }
 
 
 
 
               tmp0_UTR5 <- tmp
-              tmp0_UTR5$source <- 'JBIO-predicted'
-              tmp0_UTR5$annotationType <- 'five_prime_UTR'
-              tmp0_UTR5$score <- '.'
-              tmp0_UTR5$phase <- '.'
+              tmp0_UTR5$source <- "JBIO-predicted"
+              tmp0_UTR5$annotationType <- "five_prime_UTR"
+              tmp0_UTR5$score <- "."
+              tmp0_UTR5$phase <- "."
 
 
               tmp0_UTR3 <- tmp
-              tmp0_UTR3$source <- 'JBIO-predicted'
-              tmp0_UTR3$annotationType <- 'three_prime_UTR'
-              tmp0_UTR3$score <- '.'
-              tmp0_UTR3$phase <- '.'
+              tmp0_UTR3$source <- "JBIO-predicted"
+              tmp0_UTR3$annotationType <- "three_prime_UTR"
+              tmp0_UTR3$score <- "."
+              tmp0_UTR3$phase <- "."
 
               tmp0_transcript <- tmp
-              tmp0_transcript$source <- 'JBIO-predicted'
-              tmp0_transcript$annotationType <- 'transcript'
-              tmp0_transcript$score <- '.'
-              tmp0_transcript$phase <- '.'
+              tmp0_transcript$source <- "JBIO-predicted"
+              tmp0_transcript$annotationType <- "transcript"
+              tmp0_transcript$score <- "."
+              tmp0_transcript$phase <- "."
 
-              if (sen == '+') {
-
-
-                #UTR5
+              if (sen == "+") {
+                # UTR5
                 if (!is.na(five_prime_utr_length_cor_plus)) {
-
                   utr5_start <- as.integer(min(tmp$start) - five_prime_utr_length_cor_plus)
                   if (utr5_start < 0) {
                     utr5_start <- 0
@@ -1280,75 +1157,54 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR5
-
-
                 }
 
 
-                #UTR3
+                # UTR3
                 if (!is.na(three_prime_utr_length_cor_plus)) {
-
                   tmp0_UTR3$start <- as.integer(max(tmp$end) + 1)
                   tmp0_UTR3$end <- as.integer(max(tmp$end) + three_prime_utr_length_cor_plus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR3
-
-
                 }
 
 
-                #TRANSCRIPT
+                # TRANSCRIPT
 
                 if (!is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
                   tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (!is.na(three_prime_utr_length_cor_plus) & is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 }
-
-
-              } else if (sen == '-') {
-
-                #UTR3
+              } else if (sen == "-") {
+                # UTR3
                 if (!is.na(three_prime_utr_length_cor_minus)) {
-
                   utr3_start <- as.integer(min(tmp$start) - three_prime_utr_length_cor_minus)
                   if (utr3_start < 0) {
                     utr3_start <- 0
@@ -1360,549 +1216,426 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR3
-
-
                 }
 
 
-                #UTR5
+                # UTR5
                 if (!is.na(five_prime_utr_length_cor_minus)) {
-
                   tmp0_UTR5$start <- as.integer(max(tmp$end) + 1)
                   tmp0_UTR5$end <- as.integer(max(tmp$end) + five_prime_utr_length_cor_minus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR5
-
-
                 }
 
-                #TRANSCRIPT
+                # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
                   tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (!is.na(five_prime_utr_length_cor_minus) & is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 }
-
               }
-
-
             } else if (i < length(gen_list)) {
-
               # middle element
 
-              tmp_p <- tmp_genes[tmp_genes$gene_name %in% gen_list[i-1],]
+              tmp_p <- tmp_genes[tmp_genes$gene_name %in% gen_list[i - 1], ]
 
-              tmp2 <- tmp_genes[tmp_genes$gene_name %in% gen_list[i+1],]
+              tmp2 <- tmp_genes[tmp_genes$gene_name %in% gen_list[i + 1], ]
 
 
-              if (min(tmp2$start) > (max(tmp$end) + (five_prime_utr_length + three_prime_utr_length)+2)) {
-
+              if (min(tmp2$start) > (max(tmp$end) + (five_prime_utr_length + three_prime_utr_length) + 2)) {
                 three_prime_utr_length_cor_plus <- three_prime_utr_length
 
                 five_prime_utr_length_cor_minus <- five_prime_utr_length
 
                 ################################################################################################
-                if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)+2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - (five_prime_utr_length + three_prime_utr_length)+2) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) + 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - (five_prime_utr_length + three_prime_utr_length) + 2) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length )/2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.5,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length )/2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.5,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.5, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.5, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/3)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.3,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/3)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.3,0)
-
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 3)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.3, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 3)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.3, 0)
                 } else if (max(tmp_p$end) < min(tmp$start)) {
-
-                  if (sen == '+') {
-                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                  if (sen == "+") {
+                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (five_prime_utr_length_cor_plus < 0) {
                       five_prime_utr_length_cor_plus <- 0
                     }
-
                   } else {
-                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) -2)/2 ,0)
+                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (three_prime_utr_length_cor_minus < 0) {
                       three_prime_utr_length_cor_minus <- 0
                     }
-
                   }
-
                 }
                 #################################################################################################
+              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length) / 2)) {
+                three_prime_utr_length_cor_plus <- round(three_prime_utr_length * 0.5, 0)
 
-
-              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length)/2)) {
-
-                three_prime_utr_length_cor_plus <- round(three_prime_utr_length*0.5,0)
-
-                five_prime_utr_length_cor_minus <- round(five_prime_utr_length*0.5,0)
+                five_prime_utr_length_cor_minus <- round(five_prime_utr_length * 0.5, 0)
 
                 ################################################################################################
-                if (max(tmp_p$end) > (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)+2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                } else if (max(tmp_p$end) > (min(tmp$start) - (five_prime_utr_length + three_prime_utr_length)+2) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                if (max(tmp_p$end) > (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) + 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                } else if (max(tmp_p$end) > (min(tmp$start) - (five_prime_utr_length + three_prime_utr_length) + 2) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length )/2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.5,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length )/2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.5,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.5, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.5, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/3)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.3,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/3)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.3,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 3)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.3, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 3)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.3, 0)
                 } else if (max(tmp_p$end) < min(tmp$start)) {
-
-                  if (sen == '+') {
-                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                  if (sen == "+") {
+                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (five_prime_utr_length_cor_plus < 0) {
                       five_prime_utr_length_cor_plus <- 0
                     }
-
                   } else {
-                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (three_prime_utr_length_cor_minus < 0) {
                       three_prime_utr_length_cor_minus <- 0
                     }
-
                   }
-
                 }
                 #################################################################################################
+              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length) / 3)) {
+                three_prime_utr_length_cor_plus <- round(three_prime_utr_length * 0.3, 0)
 
-
-
-              } else if (min(tmp2$start) > max(tmp$end) + ((five_prime_utr_length + three_prime_utr_length)/3)) {
-
-                three_prime_utr_length_cor_plus <- round(three_prime_utr_length*0.3,0)
-
-                five_prime_utr_length_cor_minus <- round(five_prime_utr_length*0.3,0)
+                five_prime_utr_length_cor_minus <- round(five_prime_utr_length * 0.3, 0)
 
                 ################################################################################################
-                if (max(tmp_p$end) > (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)+2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)+2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                if (max(tmp_p$end) > (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) + 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) + 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length )/2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.5,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) + ((five_prime_utr_length + three_prime_utr_length )/2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.5,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.5, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) + ((five_prime_utr_length + three_prime_utr_length) / 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.5, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/3)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.3,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/3)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.3,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 3)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.3, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 3)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.3, 0)
                 } else if (max(tmp_p$end) < min(tmp$start)) {
-
-                  if (sen == '+') {
-                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                  if (sen == "+") {
+                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (five_prime_utr_length_cor_plus < 0) {
                       five_prime_utr_length_cor_plus <- 0
                     }
                   } else {
-                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (three_prime_utr_length_cor_minus < 0) {
                       three_prime_utr_length_cor_minus <- 0
                     }
-
                   }
-
                 }
                 #################################################################################################
-
-
               } else if (min(tmp2$start) > max(tmp$end)) {
-
-
-
-                three_prime_utr_length_cor_plus <- round((min(tmp2$start) - max(tmp$end) - 2)/2,0)
+                three_prime_utr_length_cor_plus <- round((min(tmp2$start) - max(tmp$end) - 2) / 2, 0)
                 if (three_prime_utr_length_cor_plus < 0) {
                   three_prime_utr_length_cor_plus <- 0
                 }
 
-                five_prime_utr_length_cor_minus <- round((min(tmp2$start) - max(tmp$end) - 2)/2,0)
+                five_prime_utr_length_cor_minus <- round((min(tmp2$start) - max(tmp$end) - 2) / 2, 0)
                 if (five_prime_utr_length_cor_minus < 0) {
                   five_prime_utr_length_cor_minus <- 0
                 }
 
                 ################################################################################################
-                if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)+2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)+2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) + 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) + 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length )/2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.5,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length )/2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.5,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.5, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.5, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/3)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.3,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/3)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.3,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 3)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.3, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 3)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.3, 0)
                 } else if (max(tmp_p$end) < min(tmp$start)) {
-
-                  if (sen == '+') {
-                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                  if (sen == "+") {
+                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (five_prime_utr_length_cor_plus < 0) {
                       five_prime_utr_length_cor_plus <- 0
                     }
                   } else {
-                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (three_prime_utr_length_cor_minus < 0) {
                       three_prime_utr_length_cor_minus <- 0
                     }
-
                   }
-
                 }
                 #################################################################################################
-
               } else if (max(tmp_p$end) < min(tmp$start)) {
-
-
-                if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)+2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)+2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
+                if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) + 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) + 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length )/2)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.5,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length )/2)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.5,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 2)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.5, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 2)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.5, 0)
                   #
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/3)) & sen == '+') {
-                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.3,0)
-                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/3)) & sen == '-') {
-                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.3,0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 3)) & sen == "+") {
+                  five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.3, 0)
+                } else if (max(tmp_p$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 3)) & sen == "-") {
+                  three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.3, 0)
                 } else if (max(tmp_p$end) < min(tmp$start)) {
-
-                  if (sen == '+') {
-                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                  if (sen == "+") {
+                    five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (five_prime_utr_length_cor_plus < 0) {
                       five_prime_utr_length_cor_plus <- 0
                     }
                   } else {
-                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) -2)/2,0)
+                    three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp_p$end) - 2) / 2, 0)
                     if (three_prime_utr_length_cor_minus < 0) {
                       three_prime_utr_length_cor_minus <- 0
                     }
-
                   }
-
                 }
-
-
               }
 
 
 
               tmp0_UTR5 <- tmp
-              tmp0_UTR5$source <- 'JBIO-predicted'
-              tmp0_UTR5$annotationType <- 'five_prime_UTR'
-              tmp0_UTR5$score <- '.'
-              tmp0_UTR5$phase <- '.'
+              tmp0_UTR5$source <- "JBIO-predicted"
+              tmp0_UTR5$annotationType <- "five_prime_UTR"
+              tmp0_UTR5$score <- "."
+              tmp0_UTR5$phase <- "."
 
 
               tmp0_UTR3 <- tmp
-              tmp0_UTR3$source <- 'JBIO-predicted'
-              tmp0_UTR3$annotationType <- 'three_prime_UTR'
-              tmp0_UTR3$score <- '.'
-              tmp0_UTR3$phase <- '.'
+              tmp0_UTR3$source <- "JBIO-predicted"
+              tmp0_UTR3$annotationType <- "three_prime_UTR"
+              tmp0_UTR3$score <- "."
+              tmp0_UTR3$phase <- "."
 
               tmp0_transcript <- tmp
-              tmp0_transcript$source <- 'JBIO-predicted'
-              tmp0_transcript$annotationType <- 'transcript'
-              tmp0_transcript$score <- '.'
-              tmp0_transcript$phase <- '.'
+              tmp0_transcript$source <- "JBIO-predicted"
+              tmp0_transcript$annotationType <- "transcript"
+              tmp0_transcript$score <- "."
+              tmp0_transcript$phase <- "."
 
-              if (sen == '+') {
-
-
-                #UTR5
+              if (sen == "+") {
+                # UTR5
                 if (!is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_UTR5$start <- as.integer(min(tmp$start) - five_prime_utr_length_cor_plus)
                   tmp0_UTR5$end <- as.integer(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR5
-
-
                 }
 
 
-                #UTR3
+                # UTR3
                 if (!is.na(three_prime_utr_length_cor_plus)) {
-
                   tmp0_UTR3$start <- as.integer(max(tmp$end) + 1)
                   tmp0_UTR3$end <- as.integer(max(tmp$end) + three_prime_utr_length_cor_plus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR3
-
-
                 }
 
 
-                #TRANSCRIPT
+                # TRANSCRIPT
                 if (!is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
                   tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (!is.na(three_prime_utr_length_cor_plus) & is.na(five_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 }
-
-
-
-              } else if (sen == '-') {
-
-                #UTR3
+              } else if (sen == "-") {
+                # UTR3
                 if (!is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_UTR3$start <- as.integer(min(tmp$start) - three_prime_utr_length_cor_minus)
                   tmp0_UTR3$end <- as.integer(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR3
-
-
                 }
 
 
-                #UTR5
+                # UTR5
                 if (!is.na(five_prime_utr_length_cor_minus)) {
-
                   tmp0_UTR5$start <- as.integer(max(tmp$end) + 1)
                   tmp0_UTR5$end <- as.integer(max(tmp$end) + five_prime_utr_length_cor_minus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR5
-
-
                 }
 
 
-                #TRANSCRIPT
+                # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
                   tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (!is.na(five_prime_utr_length_cor_minus) & is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
                 }
-
               }
-
             } else if (i == length(gen_list)) {
-
               # final element
 
 
-              tmp2 <- tmp_genes[tmp_genes$gene_name %in% gen_list[i-1],]
+              tmp2 <- tmp_genes[tmp_genes$gene_name %in% gen_list[i - 1], ]
 
 
               # End UTR
 
               if (max(tmp2$end) < max(tmp$end)) {
-
-                three_prime_utr_length_cor_plus <- round(three_prime_utr_length,0)
-                five_prime_utr_length_cor_minus <- round(five_prime_utr_length,0)
-
+                three_prime_utr_length_cor_plus <- round(three_prime_utr_length, 0)
+                five_prime_utr_length_cor_minus <- round(five_prime_utr_length, 0)
               }
 
 
               # tmp2 -> tmp1 +
-              if (max(tmp2$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length )+2)) & sen == '+') {
-
-                five_prime_utr_length_cor_plus <- round(five_prime_utr_length,0)
-
-              } else if (max(tmp2$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/2)) & sen == '+') {
-
-                five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.5,0)
-
-              } else if (max(tmp2$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length)/3)) & sen == '+') {
-
-                five_prime_utr_length_cor_plus <- round(five_prime_utr_length*0.3,0)
-
-              } else if (max(tmp2$end) < min(tmp$start) & sen == '+') {
-
-                five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp2$end) -2)/2, 0)
+              if (max(tmp2$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) + 2)) & sen == "+") {
+                five_prime_utr_length_cor_plus <- round(five_prime_utr_length, 0)
+              } else if (max(tmp2$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 2)) & sen == "+") {
+                five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.5, 0)
+              } else if (max(tmp2$end) < (min(tmp$start) - ((three_prime_utr_length + five_prime_utr_length) / 3)) & sen == "+") {
+                five_prime_utr_length_cor_plus <- round(five_prime_utr_length * 0.3, 0)
+              } else if (max(tmp2$end) < min(tmp$start) & sen == "+") {
+                five_prime_utr_length_cor_plus <- round((min(tmp$start) - max(tmp2$end) - 2) / 2, 0)
                 if (five_prime_utr_length_cor_plus < 0) {
                   five_prime_utr_length_cor_plus <- 0
                 }
-
               }
 
 
               # tmp2 -> tmp1 -
-              if (max(tmp2$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)+2)) & sen == '-') {
-
-                three_prime_utr_length_cor_minus <- round(three_prime_utr_length,0)
-
-              } else if (max(tmp2$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/2)) & sen == '-') {
-
-                three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.5,0)
-
-              } else if (max(tmp2$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length)/3)) & sen == '-') {
-
-                three_prime_utr_length_cor_minus <- round(three_prime_utr_length*0.3,0)
-
-              } else if (max(tmp2$end) < min(tmp$start) & sen == '-') {
-
-                three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp2$end) -2) / 2, 0)
+              if (max(tmp2$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) + 2)) & sen == "-") {
+                three_prime_utr_length_cor_minus <- round(three_prime_utr_length, 0)
+              } else if (max(tmp2$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 2)) & sen == "-") {
+                three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.5, 0)
+              } else if (max(tmp2$end) < (min(tmp$start) - ((five_prime_utr_length + three_prime_utr_length) / 3)) & sen == "-") {
+                three_prime_utr_length_cor_minus <- round(three_prime_utr_length * 0.3, 0)
+              } else if (max(tmp2$end) < min(tmp$start) & sen == "-") {
+                three_prime_utr_length_cor_minus <- round((min(tmp$start) - max(tmp2$end) - 2) / 2, 0)
                 if (three_prime_utr_length_cor_minus < 0) {
                   three_prime_utr_length_cor_minus <- 0
-
                 }
-
               }
 
 
 
               tmp0_UTR5 <- tmp
-              tmp0_UTR5$source <- 'JBIO-predicted'
-              tmp0_UTR5$annotationType <- 'five_prime_UTR'
-              tmp0_UTR5$score <- '.'
-              tmp0_UTR5$phase <- '.'
+              tmp0_UTR5$source <- "JBIO-predicted"
+              tmp0_UTR5$annotationType <- "five_prime_UTR"
+              tmp0_UTR5$score <- "."
+              tmp0_UTR5$phase <- "."
 
 
               tmp0_UTR3 <- tmp
-              tmp0_UTR3$source <- 'JBIO-predicted'
-              tmp0_UTR3$annotationType <- 'three_prime_UTR'
-              tmp0_UTR3$score <- '.'
-              tmp0_UTR3$phase <- '.'
+              tmp0_UTR3$source <- "JBIO-predicted"
+              tmp0_UTR3$annotationType <- "three_prime_UTR"
+              tmp0_UTR3$score <- "."
+              tmp0_UTR3$phase <- "."
 
               tmp0_transcript <- tmp
-              tmp0_transcript$source <- 'JBIO-predicted'
-              tmp0_transcript$annotationType <- 'transcript'
-              tmp0_transcript$score <- '.'
-              tmp0_transcript$phase <- '.'
+              tmp0_transcript$source <- "JBIO-predicted"
+              tmp0_transcript$annotationType <- "transcript"
+              tmp0_transcript$score <- "."
+              tmp0_transcript$phase <- "."
 
-              if (sen == '+') {
-
-
-                #UTR5
+              if (sen == "+") {
+                # UTR5
                 if (!is.na(five_prime_utr_length_cor_plus)) {
-
                   utr5_start <- as.integer(min(tmp$start) - five_prime_utr_length_cor_plus)
                   if (utr5_start < 0) {
                     utr5_start <- 0
@@ -1914,76 +1647,54 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR5
-
-
                 }
 
 
 
-                #UTR3
+                # UTR3
                 if (!is.na(three_prime_utr_length_cor_plus)) {
-
                   tmp0_UTR3$start <- as.integer(max(tmp$end) + 1)
                   tmp0_UTR3$end <- as.integer(max(tmp$end) + three_prime_utr_length_cor_plus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR3
-
-
                 }
 
 
-                #TRANSCRIPT
+                # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_plus) & !is.na(three_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
                   tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (is.na(five_prime_utr_length_cor_plus) & !is.na(three_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (!is.na(five_prime_utr_length_cor_plus) & is.na(three_prime_utr_length_cor_plus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 }
-
-
-
-              } else if (sen == '-') {
-
-                #UTR3
+              } else if (sen == "-") {
+                # UTR3
                 if (!is.na(three_prime_utr_length_cor_minus)) {
-
                   utr3_start <- as.integer(min(tmp$start) - three_prime_utr_length_cor_minus)
                   if (utr3_start < 0) {
                     utr3_start <- 0
@@ -1995,72 +1706,52 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR3
-
-
                 }
 
 
-                #UTR5
+                # UTR5
                 if (!is.na(five_prime_utr_length_cor_minus)) {
-
                   tmp0_UTR5$start <- as.integer(max(tmp$end + 1))
                   tmp0_UTR5$end <- as.integer(max(tmp$end) + five_prime_utr_length_cor_minus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_UTR5
-
-
                 }
 
 
-                #TRANSCRIPT
+                # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
                   tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else if (!is.na(five_prime_utr_length_cor_minus) & is.na(three_prime_utr_length_cor_minus)) {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 } else {
-
                   tmp0_transcript$start <- as.integer(min(tmp$start))
                   tmp0_transcript$end <- as.integer(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
-
-
                 }
-
               }
-
             }
-
           }
         }
       }
@@ -2133,70 +1824,53 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 #' exons are matched, and the resulting structure is formatted in the refflat style.
 #'
 #' @examples
-#
+#' #
 #' # Run the function
-#' refflat_data <- refflat_create(input, geneName = 'gene_name', name = 'gene_id', genetic_elements = c("CDS", 'GENE', 'MRNA'))
+#' refflat_data <- refflat_create(input, geneName = "gene_name", name = "gene_id", genetic_elements = c("CDS", "GENE", "MRNA"))
 #'
 #' @import stringr dplyr doSNOW foreach parallel doParallel
 #' @export
-refflat_create <- function(input, geneName = 'gene_name', name = 'transcript_id', genetic_elements = c("TRANSCRIPT", "MRNA", "CDS", 'GENE')) {
-
+refflat_create <- function(input, geneName = "gene_name", name = "transcript_id",
+                           genetic_elements = c("TRANSCRIPT", "MRNA", "CDS", "GENE")) {
   set.seed(123)
-
   input <- sort_alias(input)
-
   options(scipen = 999)
-
   iterations <- length(unique(input$chr))
   pb <- txtProgressBar(max = iterations, style = 3)
   progress <- function(n) setTxtProgressBar(pb, n)
   opts <- list(progress = progress)
-
-
   CPU <- max(1, detectCores() - 2)
-
   cl <- makeCluster(CPU)
-
-
-
   registerDoParallel(cl)
   registerDoSNOW(cl)
-
-
-
-  input <- input[,c('chr', 'start', 'end' ,'gene_name', 'gene_id', 'transcript_name', 'transcript_id', 'strand', 'annotationType')]
+  input <- input[, c(
+    "chr", "start", "end", "gene_name", "gene_id",
+    "transcript_name", "transcript_id", "strand", "annotationType"
+  )]
   input <- distinct(input)
-
   input$sort_val <- 1:length(input$chr)
   input$diff <- input$end - input$start
-
-
   chromosomes <- unique(input$chr)
-
-
-
-
-  cat('\n\n Refflat creating ... \n\n')
-  results <- foreach(chr = chromosomes, .packages = c('dplyr'), .options.snow = opts, .combine=rbind) %dopar% {
-
+  cat("\n\n Refflat creating ... \n\n")
+  results <- foreach(
+    chr = chromosomes, .packages = c("dplyr"),
+    .options.snow = opts, .combine = rbind
+  ) %dopar% {
     df <- data.frame(matrix(ncol = 11, nrow = 0))
-    colnames(df) <- c('geneName', 'name', 'chrom', 'strand', 'txStart','txEnd', 'cdsStart', 'cdsEnd', 'exonCount', 'exonStarts', 'exonEnds')
-
-
-    for (sen in c('+','-')) {
-      tmp <- input[input$chr %in% chr & input$strand %in% sen, ]
-
+    colnames(df) <- c(
+      "geneName", "name", "chrom", "strand",
+      "txStart", "txEnd", "cdsStart", "cdsEnd", "exonCount",
+      "exonStarts", "exonEnds"
+    )
+    for (sen in c("+", "-")) {
+      tmp <- input[input$chr %in% chr & input$strand %in%
+        sen, ]
       gen_list <- unique(tmp$gene_name)
-
-      if (length(gen_list) == 0) {break}
-
-
+      if (length(gen_list) == 0) {
+        break
+      }
       for (i in 1:length(gen_list)) {
-
-
-        tmp_transcripts <- tmp[tmp$gene_name %in% gen_list[i],]
-
-
+        tmp_transcripts <- tmp[tmp$gene_name %in% gen_list[i], ]
         locus <- NULL
         for (g in genetic_elements) {
           if (g %in% toupper(tmp_transcripts$annotationType)) {
@@ -2204,29 +1878,23 @@ refflat_create <- function(input, geneName = 'gene_name', name = 'transcript_id'
             break
           }
         }
-
         if (is.null(locus)) {
           next
         }
-
-        tmp_exons <- tmp_transcripts[toupper(tmp_transcripts$annotationType) %in% c('EXON'),]
-        tmp_transcripts <- tmp_transcripts[toupper(tmp_transcripts$annotationType) %in% c(locus),]
-
+        tmp_exons <- tmp_transcripts[toupper(tmp_transcripts$annotationType) %in%
+          c("EXON"), ]
+        tmp_transcripts <- tmp_transcripts[toupper(tmp_transcripts$annotationType) %in%
+          c(locus), ]
         if (length(tmp_transcripts$chr) == 0) {
-
           next
         }
-
         for (tix in rownames(tmp_transcripts)) {
-
-          corr_transcript <- tmp_transcripts[tix,]
-          curr_exons <- tmp_exons[tmp_exons$transcript_id %in% corr_transcript$transcript_id,]
-
-
+          corr_transcript <- tmp_transcripts[tix, ]
+          curr_exons <- tmp_exons[tmp_exons$transcript_id %in%
+            corr_transcript$transcript_id, ]
           if (nrow(curr_exons) > 0) {
-
-            geneName <- as.character(corr_transcript$gene_name[1])
-            name <- as.character(corr_transcript$transcript_id[1])
+            geneName <- gsub("\"", "", as.character(corr_transcript$gene_name[1]))
+            name <- gsub("\"", "", as.character(corr_transcript$transcript_id[1]))
             chrom <- as.character(corr_transcript$chr[1])
             strand <- as.character(corr_transcript$strand[1])
             txStart <- as.character(corr_transcript$start[1])
@@ -2235,40 +1903,20 @@ refflat_create <- function(input, geneName = 'gene_name', name = 'transcript_id'
             cdsEnd <- as.character(max(curr_exons$end))
             exonCount <- as.character(length(curr_exons$start))
 
-            exonStarts <- c()
-            exonEnds <- c()
-            for(ex in 1:nrow(curr_exons)) {
-              exonStarts <- c(exonStarts, as.character(curr_exons$start[ex]))
-              exonEnds <- c(exonEnds, as.character(curr_exons$end[ex]))
+            exonStarts <- paste0(format(curr_exons$start, scientific = FALSE), collapse = ",")
+            exonEnds <- paste0(format(curr_exons$end, scientific = FALSE), collapse = ",")
 
-            }
-
-
-
-            df[nrow(df) + 1,] <- c(as.character(gsub('"', '', geneName)),
-                                   as.character(gsub('"', '', name)),
-                                   chrom,
-                                   strand,
-                                   as.integer(txStart),
-                                   as.integer(txEnd),
-                                   as.integer(cdsStart),
-                                   as.integer(cdsEnd),
-                                   as.integer(exonCount),
-                                   sub('"', '', paste0(exonStarts, collapse = ',')),
-                                   sub('"', '', paste0(exonEnds, collapse = ',')))
-
-
-
+            df[nrow(df) + 1, ] <- c(
+              geneName, name, chrom, strand,
+              txStart, txEnd, cdsStart, cdsEnd,
+              exonCount, exonStarts, exonEnds
+            )
           } else {
-
-
-
             geneName <- as.character(corr_transcript$gene_name[1])
             name <- as.character(corr_transcript$transcript_id[1])
             if (length(name) == 0) {
               name <- as.character(corr_transcript$gene_id[1])
             }
-
             chrom <- as.character(corr_transcript$chr[1])
             strand <- as.character(corr_transcript$strand[1])
             txStart <- as.character(corr_transcript$start[1])
@@ -2277,42 +1925,31 @@ refflat_create <- function(input, geneName = 'gene_name', name = 'transcript_id'
             cdsEnd <- as.character(corr_transcript$end[1])
             exonCount <- 1
 
-            exonStarts <- as.character(corr_transcript$start[1])
-            exonEnds <- as.character(corr_transcript$end[1])
+            exonStarts <- format(curr_exons$start[1], scientific = FALSE)
+            exonEnds <- format(curr_exons$end[1], scientific = FALSE)
 
-            df[nrow(df) + 1,] <- c(as.character(gsub('"', '', geneName)),
-                                   as.character(gsub('"', '', name)),
-                                   chrom,
-                                   strand,
-                                   as.integer(txStart),
-                                   as.integer(txEnd),
-                                   as.integer(cdsStart),
-                                   as.integer(cdsEnd),
-                                   as.integer(exonCount),
-                                   as.integer(exonStarts),
-                                   as.integer(exonEnds))
-
-
-
+            df[nrow(df) + 1, ] <- c(
+              as.character(gsub(
+                "\"",
+                "", geneName
+              )), as.character(gsub(
+                "\"",
+                "", name
+              )), chrom, strand, as.integer(txStart),
+              as.integer(txEnd), as.integer(cdsStart),
+              as.integer(cdsEnd), as.integer(exonCount),
+              as.integer(exonStarts), as.integer(exonEnds)
+            )
           }
-
         }
-
       }
     }
-
     return(df)
-
   }
-
-
   close(pb)
   stopCluster(cl)
-
   return(results)
 }
-
-
 
 
 
@@ -2349,18 +1986,17 @@ refflat_create <- function(input, geneName = 'gene_name', name = 'transcript_id'
 #'
 #' @export
 create_full_GTF <- function(input) {
-
   set.seed(123)
 
   options(scipen = 999)
 
-  output <- input[,1:8]
+  output <- input[, 1:8]
 
-  gene_id <- gsub(' ', '', input$gene_id)
-  gene_name <- gsub(' ', '', input$gene_name)
-  transcript_name <- gsub(' ', '', input$transcript_name)
-  transcript_id <- gsub(' ', '', input$transcript_id)
-  gene_type <- gsub(' ', '', input$gene_type)
+  gene_id <- gsub(" ", "", input$gene_id)
+  gene_name <- gsub(" ", "", input$gene_name)
+  transcript_name <- gsub(" ", "", input$transcript_name)
+  transcript_id <- gsub(" ", "", input$transcript_id)
+  gene_type <- gsub(" ", "", input$gene_type)
 
 
   combine_row <- function(id, name, tr_name, tr_id, gt) {
@@ -2370,14 +2006,12 @@ create_full_GTF <- function(input) {
       if (nchar(tr_name) > 0) paste0("transcript_name ", tr_name, ";"),
       if (nchar(tr_id) > 0) paste0("transcript_id ", tr_id, ";"),
       if (nchar(gt) > 0) paste0("gene_type ", gt, ";")
-
     )
     paste(parts, collapse = " ")
   }
 
   output$combine <- mapply(combine_row, gene_id, gene_name, transcript_name, transcript_id, gene_type)
   return(output)
-
 }
 
 
@@ -2424,18 +2058,15 @@ create_full_GTF <- function(input) {
 #'
 #' @export
 create_reduced_GTF <- function(input) {
-
   set.seed(123)
 
   options(scipen = 999)
 
   output <- input %>%
-    dplyr::select(chr,start,end,strand,transcript_name,transcript_id, gene_name, gene_id, gene_type)
+    dplyr::select(chr, start, end, strand, transcript_name, transcript_id, gene_name, gene_id, gene_type)
   output$annotationType <- input$annotationType
   output$transcriptType <- input$source
 
 
   return(output)
-
 }
-

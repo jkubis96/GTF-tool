@@ -52,6 +52,6 @@ for each gene. It dynamically adjusts the UTR lengths based on available space b
 \examples{
 
 # Run the function
-output_data <- add_UTR(input, five_prime_utr_length = 400, three_prime_utr_length = 800, genetic_elements = c("EXON", "CDS", 'TRANSCRIPT', 'MRNA'))
+output_data <- add_UTR(input, five_prime_utr_length = 400, three_prime_utr_length = 800, genetic_elements = c("EXON", "CDS", "TRANSCRIPT", "MRNA"))
 
 }

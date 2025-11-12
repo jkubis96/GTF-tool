@@ -10,7 +10,7 @@ add_CDS(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS"))
 \item{input}{A data frame containing genomic data. The data frame should have the following columns:
 - `chr`: Chromosome identifier
 - `start`: Start position of the annotation
-- `end`: End position of the annotation
+- `end`: End position of the annotationdevtools::build()
 - `strand`: Strand information ('+' or '-')
 - `annotationType`: Type of annotation (e.g., 'EXON', 'CDS')
 - `gene_name`: Name of the associated gene}
@@ -40,6 +40,6 @@ for each gene.
 \examples{
 
 # Run the function
-output_data <- add_CDS(input, genetic_elements = c("CDS", 'TRANSCRIPT', 'MRNA'))
+output_data <- add_CDS(input, genetic_elements = c("CDS", "TRANSCRIPT", "MRNA"))
 
 }
