@@ -1,12 +1,12 @@
 library(testthat)
 
 test_that("loading GTF", {
-  GTF <- GTF.tool::load_annotation("tests/test_anno.gtf")
+  GTF <- GTF.tool::load_annotation("test_anno.gtf")
   expect_true(all(c("X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9") %in% colnames(GTF)))
   expect_gt(nrow(GTF), 0)
 })
 
-GTF <- GTF.tool::load_annotation("tests/test_anno.gtf")
+GTF <- GTF.tool::load_annotation("test_anno.gtf")
 
 test_that("create_GTF_df", {
   GTF2 <- GTF.tool::create_GTF_df(GTF, optimize = TRUE, shift = 100000)
