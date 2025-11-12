@@ -30,7 +30,7 @@ jobs:
     - name: Install R packages
       run: |
         R -e 'install.packages(c("testthat", "remotes"))'
-        R -e 'remotes::install_url('https://github.com/jkubis96/GTF-tool/raw/refs/heads/main/packages/GTF.tool_0.1.3.tar.gz', dependencies=TRUE)'
+        R -e 'remotes::install_url("https://github.com/jkubis96/GTF-tool/raw/refs/heads/main/packages/GTF.tool_0.1.3.tar.gz", dependencies=TRUE)'
 
 
     - name: Run tests
