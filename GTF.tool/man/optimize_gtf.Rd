@@ -4,7 +4,7 @@
 \alias{optimize_gtf}
 \title{Helper for create_GTF_df}
 \usage{
-optimize_gtf(df, shift = 100000)
+optimize_gtf(df, shift = 1e+05)
 }
 \description{
 Internal function used inside create_GTF_df.

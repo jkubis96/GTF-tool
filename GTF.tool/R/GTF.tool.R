@@ -1,5 +1,3 @@
-options(scipen = 999)
-
 #' Add CDS (Coding Sequence) Annotations to Genomic Data
 #'
 #' @description
@@ -107,8 +105,8 @@ add_CDS <- function(input, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
             tmp_tr$annotationType <- "CDS"
             tmp_tr$score <- "."
             tmp_tr$phase <- "."
-            tmp_tr$start <- as.integer(min(tmp_ex$start))
-            tmp_tr$end <- as.integer(max(tmp_ex$end))
+            tmp_tr$start <- as.numeric(min(tmp_ex$start))
+            tmp_tr$end <- as.numeric(max(tmp_ex$end))
             tmp_tr$metadata <- ""
 
             df[nrow(df) + 1, ] <- tmp_tr[1, ]
@@ -235,8 +233,8 @@ add_introns <- function(input) {
                   tmp_tr$annotationType <- "intron"
                   tmp_tr$score <- "."
                   tmp_tr$phase <- "."
-                  tmp_tr$start <- as.integer(tmp_ex$end[exi - 1]) + 1
-                  tmp_tr$end <- as.integer(tmp_ex$start[exi]) - 1
+                  tmp_tr$start <- as.numeric(tmp_ex$end[exi - 1]) + 1
+                  tmp_tr$end <- as.numeric(tmp_ex$start[exi]) - 1
                   tmp_tr$metadata <- ""
 
                   df[nrow(df) + 1, ] <- tmp_tr[1, ]
@@ -425,6 +423,8 @@ sort_alias <- function(input, chromosomes_queue = NaN) {
 #' @keywords internal
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 optimize_gtf <- function(df, shift = 100000) {
+  options(scipen = 999)
+
   df$lp <- 1:length(df$X1)
 
   # repair duplicated genes names from different loci
@@ -1146,13 +1146,13 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
               if (sen == "+") {
                 # UTR5
                 if (!is.na(five_prime_utr_length_cor_plus)) {
-                  utr5_start <- as.integer(min(tmp$start) - five_prime_utr_length_cor_plus)
+                  utr5_start <- as.numeric(min(tmp$start) - five_prime_utr_length_cor_plus)
                   if (utr5_start < 0) {
                     utr5_start <- 0
                   }
 
                   tmp0_UTR5$start <- utr5_start
-                  tmp0_UTR5$end <- as.integer(min(tmp$start) - 1)
+                  tmp0_UTR5$end <- as.numeric(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
@@ -1162,8 +1162,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # UTR3
                 if (!is.na(three_prime_utr_length_cor_plus)) {
-                  tmp0_UTR3$start <- as.integer(max(tmp$end) + 1)
-                  tmp0_UTR3$end <- as.integer(max(tmp$end) + three_prime_utr_length_cor_plus)
+                  tmp0_UTR3$start <- as.numeric(max(tmp$end) + 1)
+                  tmp0_UTR3$end <- as.numeric(max(tmp$end) + three_prime_utr_length_cor_plus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
@@ -1174,29 +1174,29 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
                 # TRANSCRIPT
 
                 if (!is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
-                  tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR5$start)
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR5$start)
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (!is.na(three_prime_utr_length_cor_plus) & is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
@@ -1205,13 +1205,13 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
               } else if (sen == "-") {
                 # UTR3
                 if (!is.na(three_prime_utr_length_cor_minus)) {
-                  utr3_start <- as.integer(min(tmp$start) - three_prime_utr_length_cor_minus)
+                  utr3_start <- as.numeric(min(tmp$start) - three_prime_utr_length_cor_minus)
                   if (utr3_start < 0) {
                     utr3_start <- 0
                   }
 
                   tmp0_UTR3$start <- utr3_start
-                  tmp0_UTR3$end <- as.integer(min(tmp$start) - 1)
+                  tmp0_UTR3$end <- as.numeric(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
@@ -1221,8 +1221,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # UTR5
                 if (!is.na(five_prime_utr_length_cor_minus)) {
-                  tmp0_UTR5$start <- as.integer(max(tmp$end) + 1)
-                  tmp0_UTR5$end <- as.integer(max(tmp$end) + five_prime_utr_length_cor_minus)
+                  tmp0_UTR5$start <- as.numeric(max(tmp$end) + 1)
+                  tmp0_UTR5$end <- as.numeric(max(tmp$end) + five_prime_utr_length_cor_minus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
@@ -1231,29 +1231,29 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
-                  tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR3$start)
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR3$start)
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (!is.na(five_prime_utr_length_cor_minus) & is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
@@ -1464,8 +1464,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
               if (sen == "+") {
                 # UTR5
                 if (!is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_UTR5$start <- as.integer(min(tmp$start) - five_prime_utr_length_cor_plus)
-                  tmp0_UTR5$end <- as.integer(min(tmp$start) - 1)
+                  tmp0_UTR5$start <- as.numeric(min(tmp$start) - five_prime_utr_length_cor_plus)
+                  tmp0_UTR5$end <- as.numeric(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
@@ -1475,8 +1475,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # UTR3
                 if (!is.na(three_prime_utr_length_cor_plus)) {
-                  tmp0_UTR3$start <- as.integer(max(tmp$end) + 1)
-                  tmp0_UTR3$end <- as.integer(max(tmp$end) + three_prime_utr_length_cor_plus)
+                  tmp0_UTR3$start <- as.numeric(max(tmp$end) + 1)
+                  tmp0_UTR3$end <- as.numeric(max(tmp$end) + three_prime_utr_length_cor_plus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
@@ -1486,29 +1486,29 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # TRANSCRIPT
                 if (!is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
-                  tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR5$start)
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (is.na(three_prime_utr_length_cor_plus) & !is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR5$start)
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (!is.na(three_prime_utr_length_cor_plus) & is.na(five_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
@@ -1517,8 +1517,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
               } else if (sen == "-") {
                 # UTR3
                 if (!is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_UTR3$start <- as.integer(min(tmp$start) - three_prime_utr_length_cor_minus)
-                  tmp0_UTR3$end <- as.integer(min(tmp$start) - 1)
+                  tmp0_UTR3$start <- as.numeric(min(tmp$start) - three_prime_utr_length_cor_minus)
+                  tmp0_UTR3$end <- as.numeric(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
@@ -1528,8 +1528,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # UTR5
                 if (!is.na(five_prime_utr_length_cor_minus)) {
-                  tmp0_UTR5$start <- as.integer(max(tmp$end) + 1)
-                  tmp0_UTR5$end <- as.integer(max(tmp$end) + five_prime_utr_length_cor_minus)
+                  tmp0_UTR5$start <- as.numeric(max(tmp$end) + 1)
+                  tmp0_UTR5$end <- as.numeric(max(tmp$end) + five_prime_utr_length_cor_minus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
@@ -1539,29 +1539,29 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
-                  tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR3$start)
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR3$start)
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (!is.na(five_prime_utr_length_cor_minus) & is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
@@ -1636,13 +1636,13 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
               if (sen == "+") {
                 # UTR5
                 if (!is.na(five_prime_utr_length_cor_plus)) {
-                  utr5_start <- as.integer(min(tmp$start) - five_prime_utr_length_cor_plus)
+                  utr5_start <- as.numeric(min(tmp$start) - five_prime_utr_length_cor_plus)
                   if (utr5_start < 0) {
                     utr5_start <- 0
                   }
 
                   tmp0_UTR5$start <- utr5_start
-                  tmp0_UTR5$end <- as.integer(min(tmp$start) - 1)
+                  tmp0_UTR5$end <- as.numeric(min(tmp$start) - 1)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
@@ -1653,8 +1653,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # UTR3
                 if (!is.na(three_prime_utr_length_cor_plus)) {
-                  tmp0_UTR3$start <- as.integer(max(tmp$end) + 1)
-                  tmp0_UTR3$end <- as.integer(max(tmp$end) + three_prime_utr_length_cor_plus)
+                  tmp0_UTR3$start <- as.numeric(max(tmp$end) + 1)
+                  tmp0_UTR3$end <- as.numeric(max(tmp$end) + three_prime_utr_length_cor_plus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
@@ -1664,29 +1664,29 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_plus) & !is.na(three_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
-                  tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR5$start)
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (is.na(five_prime_utr_length_cor_plus) & !is.na(three_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(tmp0_UTR3$end)
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR3$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (!is.na(five_prime_utr_length_cor_plus) & is.na(three_prime_utr_length_cor_plus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR5$start)
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR5$start)
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
@@ -1695,13 +1695,13 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
               } else if (sen == "-") {
                 # UTR3
                 if (!is.na(three_prime_utr_length_cor_minus)) {
-                  utr3_start <- as.integer(min(tmp$start) - three_prime_utr_length_cor_minus)
+                  utr3_start <- as.numeric(min(tmp$start) - three_prime_utr_length_cor_minus)
                   if (utr3_start < 0) {
                     utr3_start <- 0
                   }
 
                   tmp0_UTR3$start <- utr3_start
-                  tmp0_UTR3$end <- as.integer(min(tmp$start - 1))
+                  tmp0_UTR3$end <- as.numeric(min(tmp$start - 1))
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR3)
                   il <- il + 1
@@ -1711,8 +1711,8 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # UTR5
                 if (!is.na(five_prime_utr_length_cor_minus)) {
-                  tmp0_UTR5$start <- as.integer(max(tmp$end + 1))
-                  tmp0_UTR5$end <- as.integer(max(tmp$end) + five_prime_utr_length_cor_minus)
+                  tmp0_UTR5$start <- as.numeric(max(tmp$end + 1))
+                  tmp0_UTR5$end <- as.numeric(max(tmp$end) + five_prime_utr_length_cor_minus)
 
                   # tmp_final <- rbind(tmp_final, tmp0_UTR5)
                   il <- il + 1
@@ -1722,29 +1722,29 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
 
                 # TRANSCRIPT
                 if (!is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
-                  tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR3$start)
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (is.na(five_prime_utr_length_cor_minus) & !is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(tmp0_UTR3$start)
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(tmp0_UTR3$start)
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else if (!is.na(five_prime_utr_length_cor_minus) & is.na(three_prime_utr_length_cor_minus)) {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(tmp0_UTR5$end)
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(tmp0_UTR5$end)
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
                   tmp_final[[il]] <- tmp0_transcript
                 } else {
-                  tmp0_transcript$start <- as.integer(min(tmp$start))
-                  tmp0_transcript$end <- as.integer(max(tmp$end))
+                  tmp0_transcript$start <- as.numeric(min(tmp$start))
+                  tmp0_transcript$end <- as.numeric(max(tmp$end))
 
                   # tmp_final <- rbind(tmp_final, tmp0_transcript)
                   il <- il + 1
@@ -1759,7 +1759,6 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
   }
 
 
-  # tmp_final <- do.call(rbind, tmp_final)
 
   tmp_final_2 <- rbindlist(tmp_final, use.names = TRUE, fill = TRUE)
 
@@ -1903,8 +1902,8 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
             cdsEnd <- as.character(max(curr_exons$end))
             exonCount <- as.character(length(curr_exons$start))
 
-            exonStarts <- paste0(format(curr_exons$start, scientific = FALSE), collapse = ",")
-            exonEnds <- paste0(format(curr_exons$end, scientific = FALSE), collapse = ",")
+            exonStarts <- gsub("\\s+", "", paste0(format(curr_exons$start, scientific = FALSE), collapse = ","))
+            exonEnds <- gsub("\\s+", "", paste0(format(curr_exons$end, scientific = FALSE), collapse = ","))
 
             df[nrow(df) + 1, ] <- c(
               geneName, name, chrom, strand,
@@ -1925,8 +1924,8 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
             cdsEnd <- as.character(corr_transcript$end[1])
             exonCount <- 1
 
-            exonStarts <- format(curr_exons$start[1], scientific = FALSE)
-            exonEnds <- format(curr_exons$end[1], scientific = FALSE)
+            exonStarts <- gsub("\\s+", "", format(curr_exons$start[1], scientific = FALSE))
+            exonEnds <- gsub("\\s+", "", format(curr_exons$end[1], scientific = FALSE))
 
             df[nrow(df) + 1, ] <- c(
               as.character(gsub(
@@ -1935,10 +1934,10 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
               )), as.character(gsub(
                 "\"",
                 "", name
-              )), chrom, strand, as.integer(txStart),
-              as.integer(txEnd), as.integer(cdsStart),
-              as.integer(cdsEnd), as.integer(exonCount),
-              as.integer(exonStarts), as.integer(exonEnds)
+              )), chrom, strand, as.numeric(txStart),
+              as.numeric(txEnd), as.numeric(cdsStart),
+              as.numeric(cdsEnd), as.numeric(exonCount),
+              as.numeric(exonStarts), as.numeric(exonEnds)
             )
           }
         }

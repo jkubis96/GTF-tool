@@ -4,7 +4,7 @@
 \alias{create_GTF_df}
 \title{Convert and Process GTF DataFrame}
 \usage{
-create_GTF_df(input, optimize = TRUE, shift = 100000)
+create_GTF_df(input, optimize = TRUE, shift = 1e+05)
 }
 \arguments{
 \item{input}{A data frame containing GTF data. The GTF file must be pre-loaded as a data frame and
