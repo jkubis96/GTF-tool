@@ -1902,8 +1902,25 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
             cdsEnd <- as.character(max(curr_exons$end))
             exonCount <- as.character(length(curr_exons$start))
 
-            exonStarts <- gsub("\\s+", "", paste0(format(curr_exons$start, scientific = FALSE), collapse = ","))
-            exonEnds <- gsub("\\s+", "", paste0(format(curr_exons$end, scientific = FALSE), collapse = ","))
+            exonStarts <- c()
+
+            for (es in curr_exons$start) {
+              exonStarts <- c(exonStarts, format(as.numeric(es), scientific = FALSE))
+            }
+
+            exonStarts <- paste0(exonStarts, collapse = ",")
+
+            rm(es)
+
+            exonEnds <- c()
+
+            for (ee in curr_exons$end) {
+              exonEnds <- c(exonEnds, format(as.numeric(ee), scientific = FALSE))
+            }
+
+            exonEnds <- paste0(exonEnds, collapse = ",")
+
+            rm(ee)
 
             df[nrow(df) + 1, ] <- c(
               geneName, name, chrom, strand,
@@ -1924,8 +1941,8 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
             cdsEnd <- as.character(corr_transcript$end[1])
             exonCount <- 1
 
-            exonStarts <- gsub("\\s+", "", format(curr_exons$start[1], scientific = FALSE))
-            exonEnds <- gsub("\\s+", "", format(curr_exons$end[1], scientific = FALSE))
+            exonStarts <- format(as.numeric(curr_exons$start[1]), scientific = FALSE)
+            exonEnds <- format(as.numeric(curr_exons$end[1]), scientific = FALSE)
 
             df[nrow(df) + 1, ] <- c(
               as.character(gsub(

@@ -82,7 +82,7 @@ GTF7 <- create_reduced_GTF(GTF5)
 
 write.table(GTF7, 'reduced_new_annotation.gtf', quote = F, sep = '\t', col.names = T, row.names = F)
 
-ref_flat <- refflat_create(GTF2)
+ref_flat <- refflat_create(GTF5)
  
 write.table(ref_flat, 'annotation.refflat', quote = F, sep = '\t', col.names = F, row.names = F)
 ```
