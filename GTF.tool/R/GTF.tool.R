@@ -1896,10 +1896,10 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
             name <- gsub("\"", "", as.character(corr_transcript$transcript_id[1]))
             chrom <- as.character(corr_transcript$chr[1])
             strand <- as.character(corr_transcript$strand[1])
-            txStart <- as.character(corr_transcript$start[1])
-            txEnd <- as.character(corr_transcript$end[1])
-            cdsStart <- as.character(min(curr_exons$start))
-            cdsEnd <- as.character(max(curr_exons$end))
+            txStart <- format(as.numeric(corr_transcript$start[1]), scientific = FALSE)
+            txEnd <- format(as.numeric(corr_transcript$end[1]), scientific = FALSE)
+            cdsStart <- format(as.numeric(min(curr_exons$start)), scientific = FALSE)
+            cdsEnd <- format(as.numeric(max(curr_exons$end)), scientific = FALSE)
             exonCount <- as.character(length(curr_exons$start))
 
             exonStarts <- c()
@@ -1935,10 +1935,10 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
             }
             chrom <- as.character(corr_transcript$chr[1])
             strand <- as.character(corr_transcript$strand[1])
-            txStart <- as.character(corr_transcript$start[1])
-            txEnd <- as.character(corr_transcript$end[1])
-            cdsStart <- as.character(corr_transcript$start[1])
-            cdsEnd <- as.character(corr_transcript$end[1])
+            txStart <- format(as.numeric(corr_transcript$start[1]), scientific = FALSE)
+            txEnd <- format(as.numeric(corr_transcript$end[1]), scientific = FALSE)
+            cdsStart <- format(as.numeric(corr_transcript$start[1]), scientific = FALSE)
+            cdsEnd <- format(as.numeric(corr_transcript$end[1]), scientific = FALSE)
             exonCount <- 1
 
             exonStarts <- format(as.numeric(curr_exons$start[1]), scientific = FALSE)
@@ -1951,10 +1951,10 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
               )), as.character(gsub(
                 "\"",
                 "", name
-              )), chrom, strand, as.numeric(txStart),
-              as.numeric(txEnd), as.numeric(cdsStart),
-              as.numeric(cdsEnd), as.numeric(exonCount),
-              as.numeric(exonStarts), as.numeric(exonEnds)
+              )), chrom, strand, txStart,
+              txEnd, cdsStart,
+              cdsEnd, exonCount,
+              exonStarts, exonEnds
             )
           }
         }
@@ -1964,6 +1964,9 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
   }
   close(pb)
   stopCluster(cl)
+
+  results <- distinct(results)
+
   return(results)
 }
 
