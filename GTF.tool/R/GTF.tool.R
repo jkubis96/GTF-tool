@@ -559,7 +559,9 @@ optimize_gtf <- function(df, shift = 100000) {
           tmp1 <- tmp[i - 1, ]
           tmp2 <- tmp[i, ]
 
-          if (tmp2$X1[1] == tmp1$X1[1] && tmp2$X4[1] - shift > tmp1$X5[1] && tmp2$transcript_id[1] != tmp1$transcript_id[1]) {
+          if (tmp2$X1[1] == tmp1$X1[1] &&
+            abs(tmp2$X4[1] - tmp1$X5[length(tmp1$X5)]) > shift &&
+            tmp2$transcript_id[1] != tmp1$transcript_id[1]) {
             group <- group + 1
           }
 
@@ -1964,8 +1966,6 @@ refflat_create <- function(input, geneName = "gene_name", name = "transcript_id"
   }
   close(pb)
   stopCluster(cl)
-
-  results <- distinct(results)
 
   return(results)
 }
