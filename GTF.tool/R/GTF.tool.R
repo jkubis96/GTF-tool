@@ -560,7 +560,7 @@ optimize_gtf <- function(df, shift = 100000) {
           tmp2 <- tmp[i, ]
 
           if (tmp2$X1[1] == tmp1$X1[1] &&
-            abs(tmp2$X4[1] - tmp1$X5[length(tmp1$X5)]) > shift &&
+            tmp2$X4[1] - tmp1$X5[length(tmp1$X5)] > shift &&
             tmp2$transcript_id[1] != tmp1$transcript_id[1]) {
             group <- group + 1
           }
@@ -773,10 +773,6 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 
 
     df <- df[, !colnames(df) %in% c("gene_id_check", "gene_name_check", "transcript_name_check", "transcript_id_check")]
-
-    df$metadata <- as.vector(input[, 9])
-
-
 
 
     if (optimize) {
