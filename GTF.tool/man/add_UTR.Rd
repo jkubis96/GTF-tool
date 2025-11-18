@@ -11,7 +11,8 @@ add_UTR(
   biotype = "protein_coding",
   transcript_limit = NULL,
   meta_string = NULL,
-  genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")
+  genetic_elements = c("TRANSCRIPT", "MRNA", "CDS"),
+  remove_original = TRUE
 )
 }
 \arguments{
@@ -29,6 +30,11 @@ add_UTR(
 
 \item{genetic_elements}{A character vector of annotation types to consider for UTR extension
 (default: c("EXON", "CDS", "TRANSCRIPT", "MRNA")).}
+
+\item{remove_original}{Boolean (TRUE/FALSE). If TRUE, the original transcript variants are
+removed after correction, leaving only the predicted ones (JBIO-predicted).
+This prevents duplicated transcript names with different coordinates,
+which some tools are unable to handle properly.}
 }
 \value{
 A data frame with the original input data and additional rows for the predicted UTRs and transcripts.

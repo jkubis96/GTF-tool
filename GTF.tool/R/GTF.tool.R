@@ -955,6 +955,10 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 #' @param three_prime_utr_length Integer, the default length of the 3' UTR to add (default: 800).
 #' @param genetic_elements A character vector of annotation types to consider for UTR extension
 #'   (default: c("EXON", "CDS", "TRANSCRIPT", "MRNA")).
+#' @param remove_original Boolean (TRUE/FALSE). If TRUE, the original transcript variants are
+#' removed after correction, leaving only the predicted ones (JBIO-predicted).
+#' This prevents duplicated transcript names with different coordinates,
+#' which some tools are unable to handle properly.
 #'
 #' @return A data frame with the original input data and additional rows for the predicted UTRs and transcripts.
 #'   Each added row includes the following fields:
@@ -975,7 +979,7 @@ create_GTF_df <- function(input, optimize = TRUE, shift = 100000) {
 #'
 #' @import stringr dplyr doSNOW foreach parallel doParallel data.table
 #' @export
-add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length = 800, biotype = "protein_coding", transcript_limit = NULL, meta_string = NULL, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS")) {
+add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length = 800, biotype = "protein_coding", transcript_limit = NULL, meta_string = NULL, genetic_elements = c("TRANSCRIPT", "MRNA", "CDS"), remove_original = TRUE) {
   genetic_elements <- toupper(genetic_elements)
   set.seed(123)
 
@@ -1770,6 +1774,16 @@ add_UTR <- function(input, five_prime_utr_length = 400, three_prime_utr_length =
   final <- rbind(final, tmp_final_2)
 
   rm(tmp_final, tmp_final_2)
+
+  if (remove_original) {
+    final <- final %>%
+      group_by(transcript_id, annotationType) %>%
+      mutate(has_jbio = any(source == "JBIO-predicted")) %>%
+      filter(!(has_jbio & source != "JBIO-predicted")) %>%
+      ungroup() %>%
+      select(-has_jbio)
+  }
+
 
   output <- sort_alias(final)
 
