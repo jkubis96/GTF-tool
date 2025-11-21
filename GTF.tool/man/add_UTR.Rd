@@ -2,7 +2,7 @@
 % Please edit documentation in R/GTF.tool.R
 \name{add_UTR}
 \alias{add_UTR}
-\title{Add UTR (Untranslated Region) Annotations to Genomic Data}
+\title{Add and Extend UTR (Untranslated Region) Annotations in Genomic Data}
 \usage{
 add_UTR(
   input,
@@ -16,44 +16,81 @@ add_UTR(
 )
 }
 \arguments{
-\item{input}{A data frame containing genomic data. The data frame should have the following columns:
+\item{input}{A data frame containing genomic annotation data. Required columns:
 - `chr`: Chromosome identifier
-- `start`: Start position of the annotation
-- `end`: End position of the annotation
-- `strand`: Strand information ('+' or '-')
-- `annotationType`: Type of annotation (e.g., 'EXON', 'CDS')
-- `gene_name`: Name of the associated gene}
+- `start`: Genomic start position
+- `end`: Genomic end position
+- `strand`: Strand ('+' or '-')
+- `annotationType`: Annotation type (e.g. 'EXON', 'CDS', 'TRANSCRIPT')
+- `gene_name`: Gene identifier
+- Additional fields such as `transcript_id`, `metadata`, `gene_type` are also used if present.}
 
-\item{five_prime_utr_length}{Integer, the default length of the 5' UTR to add (default: 400).}
+\item{five_prime_utr_length}{Integer. Default 5' UTR length to add (default: 400 bp).}
 
-\item{three_prime_utr_length}{Integer, the default length of the 3' UTR to add (default: 800).}
+\item{three_prime_utr_length}{Integer. Default 3' UTR length to add (default: 800 bp).}
 
-\item{genetic_elements}{A character vector of annotation types to consider for UTR extension
-(default: c("EXON", "CDS", "TRANSCRIPT", "MRNA")).}
+\item{biotype}{Character string or vector indicating gene biotypes to include
+(default: `"protein_coding"`).
+Only transcripts whose `gene_type` matches the biotype(s) will be extended.
+If provided biotype is absent in the input, a warning is printed.}
 
-\item{remove_original}{Boolean (TRUE/FALSE). If TRUE, the original transcript variants are
-removed after correction, leaving only the predicted ones (JBIO-predicted).
-This prevents duplicated transcript names with different coordinates,
-which some tools are unable to handle properly.}
+\item{transcript_limit}{Integer or NULL.
+If provided, transcripts shorter than this length (calculated as `end - start`)
+are excluded from UTR prediction. Useful for filtering out short non-coding
+transcripts or partial gene fragments.}
+
+\item{meta_string}{Character or NULL.
+If provided, transcripts are filtered based on a case-insensitive pattern
+matched against the `metadata` column. This enables selective extension
+of transcripts based on additional meta-annotations (e.g., `"REFSEQ"`, `"ENST"`).}
+
+\item{genetic_elements}{Character vector of annotation types to consider as
+transcript-defining elements (default: `c("TRANSCRIPT", "MRNA", "CDS")`).
+Only genes containing these annotation types will undergo UTR extension.}
+
+\item{remove_original}{Logical. If TRUE (default), original transcript
+annotations are removed and replaced exclusively by JBIO-predicted versions.
+This prevents duplicated transcript names with conflicting coordinates,
+which may break compatibility with certain bioinformatics tools.}
 }
 \value{
-A data frame with the original input data and additional rows for the predicted UTRs and transcripts.
-  Each added row includes the following fields:
-  - `source`: "JBIO-predicted" for newly added annotations
-  - `annotationType`: Indicates 'five_prime_UTR', 'three_prime_UTR', or 'transcript'
-  - `start` and `end`: Updated start and end positions for the UTRs or transcript
-  - `strand`: Strand information copied from the input data
-  - Other fields as present in the input data
+A data frame containing:
+  - Original annotation rows
+  - Additional predicted:
+      * `five_prime_UTR`
+      * `three_prime_UTR`
+      * full `transcript` models
+
+  All predicted rows include:
+  - `source = "JBIO-predicted"`
+  - Updated `start` / `end` positions
+  - Strand maintained from the input
+  - `score = "."` and `phase = "."`
 }
 \description{
-This function extends genomic annotations by adding predicted 5' and 3' untranslated regions (UTRs)
-based on input genomic data. It identifies genes within specified genetic elements and adjusts UTR lengths
-dynamically based on proximity to neighboring genes.
-Data must be pre-loaded using load_annotation() followed by create_GTF_df().
+This function extends genomic annotations by predicting and adding 5' and 3'
+untranslated regions (UTRs) for selected transcripts. It evaluates the
+distance to neighboring genes on the same chromosome and strand, and adjusts
+UTR lengths dynamically to avoid overlaps while maximizing realistic UTR
+extension.
+
+The function requires annotations pre-loaded with `load_annotation()` and
+formatted using `create_GTF_df()`.
 }
 \details{
-The function iterates over unique chromosomes and strand orientations, calculating appropriate UTR lengths
-for each gene. It dynamically adjusts the UTR lengths based on available space between genes to avoid overlap.
+The function:
+1. Iterates over chromosomes and strands.
+2. For each gene, identifies valid transcript-defining annotation elements.
+3. Computes available genomic space before and after the transcript.
+4. Dynamically adjusts UTR lengths based on:
+     - Proximity to the next and previous gene,
+     - Strand orientation,
+     - Configurable thresholds (full, 1/2, 1/3 compression),
+     - Minimum non-negative UTR lengths.
+5. Produces new transcript entries spanning predicted UTRs and original CDS/exons.
+
+The algorithm ensures that predicted UTRs do **not overlap** neighboring genes,
+and that transcript boundaries remain biologically realistic.
 }
 \examples{
 
